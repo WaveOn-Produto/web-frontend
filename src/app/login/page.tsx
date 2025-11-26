@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import LoginHeader from "@/components/LoginHeader";
 import "@/styles/app-css/login.css";
 import apiClient from "@/services/api";
 import { LoginResponse } from "@/types/auth";
@@ -78,22 +79,10 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <main className="login-root">
-      <section className="login-illustration">
-        <div className="login-figure">
-          <a href="/">
-            <img
-              src="images/id-visual/logo_escura.svg"
-              alt="Stock.io"
-              className="login-logo"
-            />
-          </a>
-          <img
-            src="/images/id-visual/garoto-caixa.svg"
-            alt="Personagem segurando uma caixa"
-            className="login-image"
-          />
-        </div>
+    <>
+      <LoginHeader />
+      <main className="login-root">
+        <section className="login-illustration">
       </section>
 
       <section className="login-card" aria-labelledby="login-title">
@@ -164,6 +153,7 @@ const LoginPage: React.FC = () => {
         </form>
       </section>
     </main>
+    </>
   );
 };
 

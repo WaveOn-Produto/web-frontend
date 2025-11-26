@@ -2,13 +2,20 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #000;
+  background-color: #ffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 3rem;
-  height: 80px;
+  height: 90px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.header.logo-only {
+  justify-content: center;
+  background-color: #348fe2;
+  padding: 0.5rem 0;
+  width: 100%;
 }
 
 .header.logged {
@@ -37,6 +44,13 @@
   transform: none;
 }
 
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  font-family: "Inter", sans-serif;
+}
+
 .logo:hover {
   transform: translateY(-2px);
   transition: transform 0.2s ease;
@@ -53,10 +67,16 @@
 /* Botões de Login / Cadastro (texto) */
 
 .login-btn {
-  color: #fff;
+  width: 95px;
+  color: #348fe2;
+  border: 1px solid #348fe2;
+  text-align: center;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: 5px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
   font-weight: 600;
+  text-decoration: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
 }
@@ -66,18 +86,21 @@
 }
 
 .cadastro-btn {
-  background: #6c63ff;
+  width: 125px;
+  height: 35px;
+  text-align: center;
+  background: #2586e0;
+  text-decoration: none;
   color: #fff !important;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 600;
   box-shadow: 0 4px 6px rgba(255, 255, 255, 0.2);
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .cadastro-btn:hover {
-  color: #60c040;
-  background: #534bcf;
   transform: translateY(-2px);
 }
 
