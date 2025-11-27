@@ -6,6 +6,7 @@ import LoginHeader from "@/components/LoginHeader";
 import "@/styles/app-css/login.css";
 import apiClient from "@/services/api";
 import { LoginResponse } from "@/types/auth";
+import { FaEnvelope, FaLock } from "react-icons/fa";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -101,35 +102,47 @@ const LoginPage: React.FC = () => {
           {serverError && <p className="form-error">{serverError}</p>}
           {success && <p className="form-success">{success}</p>}
 
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            autoComplete="email"
-            className={`login-input ${errors.email ? "input-error" : ""}`}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {errors.email && (
-            <span className="input-hint error">{errors.email}</span>
-          )}
+          <div className="input-group">
+            <label className="input-label" htmlFor="email">E-mail</label>
+            <div className="input-wrapper">
+              <FaEnvelope className="input-icon" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                placeholder="Digite seu e-mail"
+                autoComplete="email"
+                className={`login-input ${errors.email ? "input-error" : ""}`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            {errors.email && (
+              <span className="input-hint error">{errors.email}</span>
+            )}
+          </div>
 
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            placeholder="Senha"
-            autoComplete="current-password"
-            className={`login-input ${errors.password ? "input-error" : ""}`}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {errors.password && (
-            <span className="input-hint error">{errors.password}</span>
-          )}
+          <div className="input-group">
+            <label className="input-label" htmlFor="password">Senha</label>
+            <div className="input-wrapper">
+              <FaLock className="input-icon" />
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                placeholder="Digite sua senha"
+                autoComplete="current-password"
+                className={`login-input ${errors.password ? "input-error" : ""}`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            {errors.password && (
+              <span className="input-hint error">{errors.password}</span>
+            )}
+          </div>
 
           <div className="login-buttons">
             <button type="submit" className="login-button login-button-primary">

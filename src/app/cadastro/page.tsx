@@ -2,41 +2,40 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import LoginHeader from "@/components/LoginHeader";
 import "@/styles/app-css/cadastro.css";
 import apiClient from "@/services/api";
 import { User } from "@/types/auth";
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaMapMarkerAlt, FaQuestionCircle } from "react-icons/fa";
 
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState({
     name: "",
-    username: "",
     email: "",
     password: "",
-    confirm: "",
+    cellphone: "",
+    carro: "",
+    endereco: "",
   });
 
   const [errors, setErrors] = useState({
     name: "",
-    username: "",
     email: "",
     password: "",
-    confirm: "",
+    cellphone: "",
+    carro: "",
+    endereco: "",
   });
 
   const [success, setSuccess] = useState("");
   const [serverError, setServerError] = useState("");
 
   function validate() {
-    const newErrors = { name: "", username: "", email: "", password: "", confirm: "" };
+    const newErrors = { name: "", email: "", password: "", cellphone: "", carro: "", endereco: "" };
     let valid = true;
 
     if (!form.name) {
       newErrors.name = "Informe o Nome Completo.";
-      valid = false;
-    }
-
-    if (!form.username) {
-      newErrors.username = "Informe um Username.";
       valid = false;
     }
 
@@ -54,27 +53,23 @@ const RegisterPage: React.FC = () => {
     if (!form.password) {
       newErrors.password = "Informe a senha.";
       valid = false;
-    } else if (form.password.length < 8) {
-      newErrors.password = "A senha deve ter pelo menos 8 caracteres.";
-      valid = false;
-    } else if (!/[A-Z]/.test(form.password)) {
-      newErrors.password = "A senha deve conter pelo menos uma letra maiúscula.";
-      valid = false;
-    } else if (!/[a-z]/.test(form.password)) {
-      newErrors.password = "A senha deve conter pelo menos uma letra minúscula.";
-      valid = false;
-    } else if (!/[0-9]/.test(form.password)) {
-      newErrors.password = "A senha deve conter pelo menos um número.";
+    } else if (form.password.length < 6) {
+      newErrors.password = "A senha deve ter pelo menos 6 caracteres.";
       valid = false;
     }
-    else if (!/[^A-Za-z0-9]/.test(form.password)) {
-    newErrors.password = "A senha deve conter pelo menos um caractere especial.";
-    valid = false;
+
+    if (!form.cellphone) {
+      newErrors.cellphone = "Informe o celular.";
+      valid = false;
     }
 
+    if (!form.carne) {
+      newErrors.carne = "Selecione o tipo de carnê.";
+      valid = false;
+    }
 
-    if (form.confirm !== form.password) {
-      newErrors.confirm = "As senhas não conferem.";
+    if (!form.endereco) {
+      newErrors.endereco = "Selecione o endereço.";
       valid = false;
     }
 
@@ -82,7 +77,7 @@ const RegisterPage: React.FC = () => {
     return valid;
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
   }
@@ -95,23 +90,17 @@ const RegisterPage: React.FC = () => {
     if (!validate()) return;
 
     try {
-      const response = await apiClient.post<User>("/users", {
-        fullName: form.name,
-        username: form.username,
+      const response = await apiClient.post<User>("/auth/register", {
+        name: form.name,
         email: form.email,
         password: form.password,
+        cellphone: form.cellphone,
+        carne: form.carne,
+        endereco: form.endereco,
       });
-      setSuccess("Conta criada com sucesso! Redirecionando...");
-      
-      // Limpa o formulário
-      setForm({
-        name: "",
-        username: "",
-        email: "",
-        password: "",
-        confirm: "",
-      });
-      
+
+      setSuccess("Conta criada com sucesso! Redirecionando para login...");
+
       // Redireciona para login após 2 segundos
       setTimeout(() => {
         window.location.href = "/login";
@@ -127,133 +116,143 @@ const RegisterPage: React.FC = () => {
   }
 
   return (
-    <main className="signup-root">
-      <section className="signup-left">
-        <form
-          className="signup-panel"
-          aria-describedby="signup-desc"
-          onSubmit={handleSubmit}
-          noValidate
-        >
-          <header className="signup-header">
-            <h1 id="signup-title" className="signup-title">
-              CRIE SUA CONTA
-            </h1>
-          </header>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <LoginHeader />
+      
+      <div className="flex items-center justify-center px-4" style={{minHeight: 'calc(100vh - 80px)'}}>
+        <div className="cadastro-form">
+            <h1 className="cadastro-title">Criar conta</h1>
+            
+            {serverError && <p className="form-error">{serverError}</p>}
+            {success && <p className="form-success">{success}</p>}
+            
+            <form className="space-y-3" onSubmit={handleSubmit}>
+              {/* Nome */}
+              <div className="input-group">
+                <label className="input-label" htmlFor="name">Nome</label>
+                <div className="input-wrapper">
+                  <FaUser className="input-icon" />
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Digite seu nome completo"
+                    className={`cadastro-input ${errors.name ? "input-error" : ""}`}
+                    value={form.name}
+                    onChange={handleChange}
+                  />
+                </div>
+                {errors.name && <span className="input-hint error">{errors.name}</span>}
+              </div>
 
-          {serverError && <p className="form-error">{serverError}</p>}
-          {success && <p className="form-success">{success}</p>}
+              {/* Email */}
+              <div className="input-group">
+                <label className="input-label" htmlFor="email">Email</label>
+                <div className="input-wrapper">
+                  <FaEnvelope className="input-icon" />
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="Digite seu e-mail"
+                    className={`cadastro-input ${errors.email ? "input-error" : ""}`}
+                    value={form.email}
+                    onChange={handleChange}
+                  />
+                </div>
+                {errors.email && <span className="input-hint error">{errors.email}</span>}
+              </div>
 
-          <label htmlFor="name" className="sr-only">
-            Nome Completo
-          </label>
-          <input
-            id="name"
-            type="text"
-            placeholder="Nome Completo"
-            className={`signup-input ${errors.name ? "input-error" : ""}`}
-            required
-            value={form.name}
-            onChange={handleChange}
-          />
-          {errors.name && (
-            <span className="input-hint error">{errors.name}</span>
-          )}
+              {/* Senha */}
+              <div className="input-group">
+                <label className="input-label" htmlFor="password">Senha</label>
+                <div className="input-wrapper">
+                  <FaLock className="input-icon" />
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="Digite sua senha"
+                    className={`cadastro-input ${errors.password ? "input-error" : ""}`}
+                    value={form.password}
+                    onChange={handleChange}
+                  />
+                </div>
+                {errors.password && <span className="input-hint error">{errors.password}</span>}
+              </div>
 
-          <label htmlFor="username" className="sr-only">
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            placeholder="Username"
-            className={`signup-input ${errors.username ? "input-error" : ""}`}
-            required
-            value={form.username}
-            onChange={handleChange}
-          />
-          {errors.username && (
-            <span className="input-hint error">{errors.username}</span>
-          )}
+              {/* Celular */}
+              <div className="input-group">
+                <label className="input-label" htmlFor="cellphone">Celular</label>
+                <div className="input-wrapper">
+                  <FaPhone className="input-icon" />
+                  <input
+                    id="cellphone"
+                    type="tel"
+                    placeholder="Digite seu celular"
+                    className={`cadastro-input ${errors.cellphone ? "input-error" : ""}`}
+                    value={form.cellphone}
+                    onChange={handleChange}
+                  />
+                </div>
+                {errors.cellphone && <span className="input-hint error">{errors.cellphone}</span>}
+              </div>
 
-          <label htmlFor="email" className="sr-only">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Email"
-            className={`signup-input ${errors.email ? "input-error" : ""}`}
-            required
-            value={form.email}
-            onChange={handleChange}
-          />
-          {errors.email && (
-            <span className="input-hint error">{errors.email}</span>
-          )}
+              {/* Carros e Endereços lado a lado */}
+              <div className="side-by-side-fields">
+                {/* Carros */}
+                <div className="input-group half-width">
+                  <label className="input-label" htmlFor="carro">Carros</label>
+                  <div className="select-wrapper">
+                    <select
+                      id="carro"
+                      value={form.carro}
+                      onChange={handleChange}
+                      className={`cadastro-select ${errors.carro ? "input-error" : ""}`}
+                    >
+                      <option value="">Selecionar</option>
+                      <option value="honda-civic">Honda Civic - ABC1234</option>
+                      <option value="toyota-corolla">Toyota Corolla - XYZ5678</option>
+                    </select>
+                  </div>
+                  <button type="button" className="add-button" onClick={() => console.log('Adicionar carro')}>
+                    <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
+                  </button>
+                  {errors.carro && <span className="input-hint error">{errors.carro}</span>}
+                </div>
 
-          <label htmlFor="password" className="sr-only">
-            Senha
-          </label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Senha"
-            className={`signup-input ${errors.password ? "input-error" : ""}`}
-            required
-            value={form.password}
-            onChange={handleChange}
-          />
-          {errors.password && (
-            <span className="input-hint error">{errors.password}</span>
-          )}
+                {/* Endereços */}
+                <div className="input-group half-width">
+                  <label className="input-label" htmlFor="endereco">Endereços</label>
+                  <div className="select-wrapper">
+                    <select
+                      id="endereco"
+                      value={form.endereco}
+                      onChange={handleChange}
+                      className={`cadastro-select ${errors.endereco ? "input-error" : ""}`}
+                    >
+                      <option value="">Selecionar</option>
+                      <option value="casa">Casa - Rua das Flores, 123</option>
+                      <option value="trabalho">Trabalho - Av. Principal, 456</option>
+                    </select>
+                  </div>
+                  <button type="button" className="add-button" onClick={() => console.log('Adicionar endereço')}>
+                    <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
+                  </button>
+                  {errors.endereco && <span className="input-hint error">{errors.endereco}</span>}
+                </div>
+              </div>
 
-          <label htmlFor="confirm" className="sr-only">
-            Confirmar Senha
-          </label>
-          <input
-            id="confirm"
-            type="password"
-            placeholder="Confirmar Senha"
-            className={`signup-input ${errors.confirm ? "input-error" : ""}`}
-            required
-            value={form.confirm}
-            onChange={handleChange}
-          />
-          {errors.confirm && (
-            <span className="input-hint error">{errors.confirm}</span>
-          )}
-
-          <button type="submit" className="signup-button">
-            CRIAR CONTA
-          </button>
-
-          <p className="signup-login">
-            Já possui uma conta?{" "}
-            <Link href="/login" className="signup-link-cta">
-              Login
-            </Link>
-          </p>
-        </form>
-      </section>
-
-      <section className="signup-right">
-        <div className="signup-figure">
-          <a href="/">
-            <img
-              src="/images/id-visual/logo_escura.svg"
-              alt="Stock.io"
-              className="signup-logo"
-            />
-          </a>
-          <img
-            src="/images/id-visual/garoto-controle.svg"
-            alt="Ilustração personagem"
-            className="signup-image"
-          />
-        </div>
-      </section>
-    </main>
+              {/* Botões */}
+              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '24px'}}>
+                <button type="submit" className="cadastro-btn-primary">
+                  Cadastrar
+                </button>
+                <Link href="/" className="cadastro-btn-secondary">
+                  Voltar
+                </Link>
+              </div>
+            </form>
+          </div>
+      </div>
+    </div>
   );
 };
 
