@@ -1,29 +1,21 @@
 // src/components/Hero.tsx
 import React from "react";
 
-type HeroProps = {
-  lines: string[];
-  imageSrc: string;
-  imageAlt?: string;
-  className?: string;
-};
-
-export default function Hero({
-  lines,
-  imageSrc,
-  imageAlt = "Personagem",
-  className = "",
-}: HeroProps) {
+export default function Hero() {
   return (
-    <section className={`home-hero ${className}`}>
+    <section className="hero-automotive">
       <div className="hero-content">
-        {lines.map((text, index) => (
-          <h2 key={index}>{text}</h2>
-        ))}
-      </div>
-
-      <div className="hero-image">
-        <img src={imageSrc} alt={imageAlt} />
+        <h1 className="hero-title">
+          Lavagem Automotiva a domicílio,<br />
+          Sem sair de casa.
+        </h1>
+        <p className="hero-subtitle">
+          Somos Especialistas em lavagem de veículos em domicílio com<br />
+          Qualidade, Segurança e Conveniência
+        </p>
+        <button className="hero-button">
+          Agendar
+        </button>
       </div>
     </section>
   );

@@ -154,23 +154,50 @@ body {
   text-decoration: underline;
 }
 
-.login-button {
-  width: 100%;
-  padding: 12px 16px;
-  border: 0;
-  border-radius: 9999px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 800;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+/* CONTAINER DOS BOTÕES */
+.login-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
 }
 
-.login-button:hover,
-.login-button:focus-visible {
-  background: var(--primary-hover);
-  box-shadow: 0 0 0 4px rgba(107, 62, 247, 0.28);
+.login-button {
+  flex: 1;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-inter), sans-serif;
+}
+
+/* BOTÃO PRIMÁRIO (ENTRAR) */
+.login-button-primary {
+  background: linear-gradient(90deg, #3a94e7 0%, #1f66a6 100%);
+  color: white;
+}
+
+.login-button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(58, 148, 231, 0.3);
+}
+
+/* BOTÃO SECUNDÁRIO (VOLTAR) */
+.login-button-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.login-button-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
 .login-signup {

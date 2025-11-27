@@ -94,11 +94,8 @@ const LoginPage: React.FC = () => {
         >
           <header className="login-header">
             <h1 id="login-title" className="login-title">
-              BEM VINDO DE VOLTA!
+              Login
             </h1>
-            <p id="login-description" className="login-subtitle">
-              Entre com seu email e senha para continuar
-            </p>
           </header>
 
           {serverError && <p className="form-error">{serverError}</p>}
@@ -134,22 +131,14 @@ const LoginPage: React.FC = () => {
             <span className="input-hint error">{errors.password}</span>
           )}
 
-          <div className="login-forgot">
-            <a href="#" className="login-link">
-              Esqueceu sua senha?
-            </a>
-          </div>
-
-          <button type="submit" className="login-button">
-            ENTRAR
-          </button>
-
-          <p className="login-register">
-            Não possui uma conta?{" "}
-            <Link href="/cadastro" className="login-link-cta">
-              Cadastre-se
+          <div className="login-buttons">
+            <button type="submit" className="login-button login-button-primary">
+              Entrar
+            </button>
+            <Link href="/" className="login-button login-button-secondary">
+              Voltar
             </Link>
-          </p>
+          </div>
         </form>
       </section>
     </main>
