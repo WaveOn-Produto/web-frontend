@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import LoginHeader from "@/components/LoginHeader";
+import CarModal, { CarData } from "@/components/CarModal";
+import AddressModal, { AddressData } from "@/components/AddressModal";
 import "@/styles/app-css/cadastro.css";
 import apiClient from "@/services/api";
 import { User } from "@/types/auth";
@@ -17,6 +19,11 @@ const RegisterPage: React.FC = () => {
     carro: "",
     endereco: "",
   });
+
+  const [isCarModalOpen, setIsCarModalOpen] = useState(false);
+  const [carsList, setCarsList] = useState<CarData[]>([]);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [addressList, setAddressList] = useState<AddressData[]>([]);
 
   const [errors, setErrors] = useState({
     name: "",
@@ -82,6 +89,16 @@ const RegisterPage: React.FC = () => {
     setForm((prev) => ({ ...prev, [id]: value }));
   }
 
+  const handleSaveCar = (car: CarData) => {
+    setCarsList((prev) => [...prev, car]);
+    console.log("Carro salvo:", car);
+  };
+
+  const handleSaveAddress = (address: AddressData) => {
+    setAddressList((prev) => [...prev, address]);
+    console.log("Endereço salvo:", address);
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSuccess("");
@@ -119,7 +136,16 @@ const RegisterPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <LoginHeader />
       
-      <div className="flex items-center justify-center px-4" style={{minHeight: 'calc(100vh - 80px)'}}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 'calc(100vh - 80px)',
+        paddingTop: '9rem',
+        paddingBottom: '2rem',
+        paddingLeft: '1rem',
+        paddingRight: '1rem'
+      }}>
         <div className="cadastro-form">
             <h1 className="cadastro-title">Criar conta</h1>
             
@@ -208,11 +234,14 @@ const RegisterPage: React.FC = () => {
                       className={`cadastro-select ${errors.carro ? "input-error" : ""}`}
                     >
                       <option value="">Selecionar</option>
-                      <option value="honda-civic">Honda Civic - ABC1234</option>
-                      <option value="toyota-corolla">Toyota Corolla - XYZ5678</option>
+                      {carsList.map((car, index) => (
+                        <option key={index} value={`${car.brand}-${car.model}`}>
+                          {car.name} - {car.plate}
+                        </option>
+                      ))}
                     </select>
                   </div>
-                  <button type="button" className="add-button" onClick={() => console.log('Adicionar carro')}>
+                  <button type="button" className="add-button" onClick={() => setIsCarModalOpen(true)}>
                     <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
                   </button>
                   {errors.carro && <span className="input-hint error">{errors.carro}</span>}
@@ -229,11 +258,14 @@ const RegisterPage: React.FC = () => {
                       className={`cadastro-select ${errors.endereco ? "input-error" : ""}`}
                     >
                       <option value="">Selecionar</option>
-                      <option value="casa">Casa - Rua das Flores, 123</option>
-                      <option value="trabalho">Trabalho - Av. Principal, 456</option>
+                      {addressList.map((address, index) => (
+                        <option key={index} value={`${address.endereco}-${address.numero}`}>
+                          {address.endereco}, {address.numero} - {address.bairro}
+                        </option>
+                      ))}
                     </select>
                   </div>
-                  <button type="button" className="add-button" onClick={() => console.log('Adicionar endereço')}>
+                  <button type="button" className="add-button" onClick={() => setIsAddressModalOpen(true)}>
                     <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
                   </button>
                   {errors.endereco && <span className="input-hint error">{errors.endereco}</span>}
@@ -252,6 +284,20 @@ const RegisterPage: React.FC = () => {
             </form>
           </div>
       </div>
+
+      {/* Modal de Carros */}
+      <CarModal
+        isOpen={isCarModalOpen}
+        onClose={() => setIsCarModalOpen(false)}
+        onSave={handleSaveCar}
+      />
+
+      {/* Modal de Endereços */}
+      <AddressModal
+        isOpen={isAddressModalOpen}
+        onClose={() => setIsAddressModalOpen(false)}
+        onSave={handleSaveAddress}
+      />
     </div>
   );
 };
