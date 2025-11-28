@@ -18,14 +18,16 @@ export default function ServicesSection() {
         <div className="services-grid">
           <div className="service-card">
             <div className="service-image">
-              <img src="/images/services/lavagem-simples.jpg" alt="Lavagem Simples" />
+              <img src="/images/services/detalhada1.PNG" alt="Lavagem Simples" />
             </div>
             <div className="service-content">
               <h3 className="service-name">Lavagem Simples</h3>
-              <p className="service-description">Externa + Aspiração interna</p>
-              <div className="service-price">R$ 50,00</div>
+              <p className="service-description">        
+              • Externa<br/> • Interna <br/> • Aplicação Cera Líquida
+              </p>
+              <div className="service-price">A partir de R$ 80,00</div>
               <Link 
-                href={handleAgendamento("Lavagem Simples", "50,00")}
+                href={handleAgendamento("Lavagem Simples", "80,00")}
                 className="service-button"
               >
                 Agendar
@@ -35,14 +37,14 @@ export default function ServicesSection() {
           
           <div className="service-card">
             <div className="service-image">
-              <img src="/images/services/lavagem-completa.jpg" alt="Lavagem Completa" />
+              <img src="/images/services/detalhada2.png" alt="Lavagem Completa" />
             </div>
             <div className="service-content">
               <h3 className="service-name">Lavagem Completa</h3>
-              <p className="service-description">Interna + Externa + Pretinho</p>
-              <div className="service-price">R$ 80,00</div>
+              <p className="service-description">• Externa Detalhada<br/> • Interna Detalhada <br/> • Limpeza Detalhada dos Bancos <br/> • Revitalização de Plasticos</p>
+              <div className="service-price">A partir de R$ 100,00</div>
               <Link 
-                href={handleAgendamento("Lavagem Completa", "80,00")}
+                href={handleAgendamento("Lavagem Completa", "100,00")}
                 className="service-button"
               >
                 Agendar

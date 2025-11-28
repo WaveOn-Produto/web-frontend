@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import LoginHeader from "@/components/LoginHeader";
+import NavBar from "@/components/NavBar";
 import LoginModal from "@/components/LoginModal";
 import Toast from "@/components/Toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +16,10 @@ export default function AgendamentoPage() {
   const servico = searchParams.get("servico") || "Lavagem Simples";
   const preco = searchParams.get("preco") || "50,00";
   
+  const servicoImage = servico === "Lavagem Completa" 
+    ? "/images/services/detalhada2.png" 
+    : "/images/services/detalhada1.PNG";
+  
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -26,38 +30,31 @@ export default function AgendamentoPage() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
-  // Hook de autenticação
+
   const { user, loading } = useAuth();
 
-  // Gerar calendário do mês completo
+
   const generateMonthCalendar = () => {
     const today = new Date();
     const year = currentYear;
     const month = currentMonth;
     
-    // Primeiro dia do mês
     const firstDay = new Date(year, month, 1);
-    // Último dia do mês
     const lastDay = new Date(year, month + 1, 0);
-    
-    // Primeiro dia da semana (domingo = 0)
     const firstDayOfWeek = firstDay.getDay();
     
     const days = [];
     
-    // Adicionar dias vazios no início (do mês anterior)
     for (let i = 0; i < firstDayOfWeek; i++) {
       days.push(null);
     }
-    
-    // Adicionar todos os dias do mês
+
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
       const fullDate = date.toISOString().split('T')[0];
       const isToday = date.toDateString() === today.toDateString();
       const isPast = date < today;
       
-      // Calcular se está dentro dos próximos 7 dias disponíveis
       const diffInDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       const isAvailable = !isPast && !isToday && diffInDays >= 1 && diffInDays <= 7;
       
@@ -79,7 +76,7 @@ export default function AgendamentoPage() {
     };
   };
 
-  // Navegar para mês anterior
+
   const goToPreviousMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -89,7 +86,7 @@ export default function AgendamentoPage() {
     }
   };
 
-  // Navegar para próximo mês
+
   const goToNextMonth = () => {
     if (currentMonth === 11) {
       setCurrentMonth(0);
@@ -99,49 +96,41 @@ export default function AgendamentoPage() {
     }
   };
 
-  // Verificar se deve mostrar botões de navegação
+
   const today = new Date();
   const canGoPrevious = currentYear > today.getFullYear() || 
     (currentYear === today.getFullYear() && currentMonth > today.getMonth());
   
-  // Permitir próximo mês se houver dias disponíveis nos próximos 7 dias
   const nextMonthDate = new Date(currentYear, currentMonth + 1, 1);
   const diffToNextMonth = Math.ceil((nextMonthDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   const canGoNext = diffToNextMonth <= 7;
 
-  // Simular horários disponíveis com regra de 4h entre lavagens
+
   const getAvailableTimeSlots = (date: string) => {
     const allSlots = ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
     
-    // Simulação de agendamentos existentes (viria do backend)
-    // Para teste: apenas algumas datas específicas têm agendamentos
     const existingBookings: { [key: string]: string[] } = {
-      "2025-11-29": ["09:00"], // Sexta-feira: 1 agendamento
-      "2025-11-30": ["14:00"], // Sábado: 1 agendamento
-      // Outras datas ficam totalmente livres para teste
+      "2025-11-29": ["09:00"],
+      "2025-11-30": ["14:00"],
     };
     
     const bookedSlots = existingBookings[date] || [];
-    
-    // Se não há agendamentos, todos os horários estão disponíveis
+
     if (bookedSlots.length === 0) {
       return allSlots;
     }
-    
-    // Aplicar regra de 4 horas entre lavagens apenas se houver agendamentos
+
     const availableSlots = allSlots.filter(slot => {
       if (bookedSlots.includes(slot)) {
-        return false; // Horário já ocupado
+        return false;
       }
-      
-      // Verificar se há conflito com regra de 4h
+
       const currentTime = parseTime(slot);
       
       for (const bookedSlot of bookedSlots) {
         const bookedTime = parseTime(bookedSlot);
         const timeDiff = Math.abs(currentTime - bookedTime);
-        
-        // Se a diferença for menor que 4 horas (240 minutos), não disponível
+
         if (timeDiff < 240) {
           return false;
         }
@@ -153,49 +142,48 @@ export default function AgendamentoPage() {
     return availableSlots;
   };
 
-  // Função auxiliar para converter horário em minutos
+
   const parseTime = (timeStr: string): number => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
   };
 
-  // Atualizar horários disponíveis quando a data for selecionada
+
   useEffect(() => {
     if (selectedDate) {
       const available = getAvailableTimeSlots(selectedDate);
       setAvailableSlots(available);
-      setSelectedTime(""); // Reset time selection
+      setSelectedTime("");
     }
   }, [selectedDate]);
 
   const categories = [
     "Hatch",
     "Sedan",
-    "SUV",
-    "Pickup"
+    "Suv",
+    "Caminhonete"
   ];
 
   const fetchPriceByCategory = async (category: string, serviceType: string) => {
-
     const priceMap: { [key: string]: { [key: string]: string } } = {
       "Lavagem Simples": {
-        "Hatch": "45,00",
-        "Sedan": "50,00",
-        "SUV": "60,00",
-        "Pickup": "65,00"
+        "Hatch": "80,00",
+        "Sedan": "90,00",
+        "SUV": "95,00",
+        "caminhonete": "120,00"
       },
       "Lavagem Completa": {
-        "Hatch": "70,00",
-        "Sedan": "80,00",
-        "SUV": "90,00",
-        "Pickup": "95,00"
+        "Hatch": "100,00",
+        "Sedan": "110,00",
+        "SUV": "115,00",
+        "caminhonete": "150,00"
       }
     };
     
     return priceMap[serviceType]?.[category] || preco;
   };
 
-  // Atualizar preço quando categoria mudar
+
   const handleCategoryChange = async (category: string) => {
     setSelectedCategory(category);
     
@@ -203,14 +191,13 @@ export default function AgendamentoPage() {
       const newPrice = await fetchPriceByCategory(category, servico);
       setCurrentPrice(newPrice);
     } else {
-      setCurrentPrice(preco); // Preço base
+      setCurrentPrice(preco);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Verificar se usuário está logado
     if (!user) {
       setShowLoginModal(true);
       return;
@@ -221,7 +208,6 @@ export default function AgendamentoPage() {
       return;
     }
 
-    // Aqui você pode implementar a lógica de agendamento
     setToast({ message: "Agendamento realizado com sucesso!", type: "success" });
     
     setTimeout(() => {
@@ -231,15 +217,14 @@ export default function AgendamentoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      <LoginHeader />
+      <NavBar />
       
       <div className="agendamento-container">
         <div className="agendamento-content">
-          {/* Informações do Serviço */}
           <div className="service-info">
             <div className="service-image-container">
               <img 
-                src="/images/produtos/car-wash.jpg" 
+                src={servicoImage} 
                 alt={servico}
                 className="service-image"
               />
@@ -262,11 +247,9 @@ export default function AgendamentoPage() {
             </div>
           </div>
 
-          {/* Formulário de Agendamento */}
           <div className="booking-form-container">
             <form onSubmit={handleSubmit} className="booking-form">
               
-              {/* Calendário do mês completo */}
               <div className="form-section">
                 <div className="calendar-navigation">
                   <button 
@@ -289,7 +272,6 @@ export default function AgendamentoPage() {
                 </div>
                 <p className="calendar-subtitle">Dias disponíveis nos próximos 7 dias</p>
                 
-                {/* Cabeçalho dos dias da semana */}
                 <div className="calendar-header">
                   <div className="day-header">Dom</div>
                   <div className="day-header">Seg</div>
@@ -300,7 +282,6 @@ export default function AgendamentoPage() {
                   <div className="day-header">Sáb</div>
                 </div>
                 
-                {/* Grid do calendário */}
                 <div className="calendar-month-grid">
                   {generateMonthCalendar().days.map((dateObj, index) => (
                     <div key={index} className="calendar-day-container">
@@ -327,7 +308,6 @@ export default function AgendamentoPage() {
                 </div>
               </div>
 
-              {/* Horário - Baseado na data selecionada */}
               <div className="form-section">
                 <label className="section-label">Horário:</label>
                 {!selectedDate ? (
@@ -362,7 +342,6 @@ export default function AgendamentoPage() {
                 )}
               </div>
 
-              {/* Categoria */}
               <div className="form-section">
                 <label className="section-label">Categoria:</label>
                 <select
@@ -379,7 +358,6 @@ export default function AgendamentoPage() {
                 </select>
               </div>
 
-              {/* Botão de Agendar */}
               <button type="submit" className="agendar-button">
                 Agendar
               </button>
@@ -388,13 +366,11 @@ export default function AgendamentoPage() {
         </div>
       </div>
 
-      {/* Modal de Login */}
       <LoginModal 
         isOpen={showLoginModal} 
         onClose={() => setShowLoginModal(false)} 
       />
 
-      {/* Toast de notificação */}
       {toast && (
         <Toast
           message={toast.message}
