@@ -2,13 +2,17 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import LoginHeader from "@/components/LoginHeader";
+import { useAuthContext } from "@/contexts/AuthContext";
 import "@/styles/app-css/login.css";
 import apiClient from "@/services/api";
 import { LoginResponse } from "@/types/auth";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 
 const LoginPage: React.FC = () => {
+  const router = useRouter();
+  const { login } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -56,18 +60,16 @@ const LoginPage: React.FC = () => {
         password,
       });
       
-      // Armazena o token JWT no localStorage
+      // Usa o método login do AuthContext
       if (response.data.access_token) {
-        localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        window.dispatchEvent(new Event("storage"));
+        login(response.data.access_token, response.data.user);
       }
       
       setSuccess("Login realizado com sucesso! Redirecionando...");
       
       // Redireciona para a home após 1 segundo
       setTimeout(() => {
-        window.location.href = "/";
+        router.push("/");
       }, 1000);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Erro ao realizar login.";

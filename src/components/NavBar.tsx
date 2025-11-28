@@ -1,45 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { FaStore, FaShoppingBag  } from "react-icons/fa";
-import { RiAccountCircleFill, RiLogoutBoxRLine } from "react-icons/ri";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { FaCalendarAlt, FaUser } from "react-icons/fa";
+import { RiLogoutBoxRLine } from "react-icons/ri";
 
 interface NavBarProps {
   showNavLinks?: boolean;
 }
 
 export default function NavBar({ showNavLinks = true }: NavBarProps) {
-  const [logado, setLogado] = useState(false);
-
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      const token = typeof window !== "undefined"
-        ? localStorage.getItem("token")
-        : null;
-      setLogado(!!token);
-    };
-
-    checkLoginStatus();
-
-    window.addEventListener("storage", checkLoginStatus);
-
-    return () => {
-      window.removeEventListener("storage", checkLoginStatus);
-    };
-  }, []);
+  const { isAuthenticated, logout, user } = useAuthContext();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setLogado(false);
-    window.dispatchEvent(new Event("storage"));
-    window.location.href = "/";
+    logout();
   };
 
   const getHeaderClass = () => {
     let classes = "header";
-    if (logado) classes += " logged";
+    if (isAuthenticated) classes += " logged";
     if (!showNavLinks) classes += " logo-only";
     return classes;
   };
@@ -53,7 +32,7 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
           ) : (
             <img
               src="/images/id-visual/WaveOn.svg"
-              alt="Logo Stock.io"
+              alt="Logo WaveOn"
               className="logo-img"
             />
           )}
@@ -62,19 +41,19 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
 
       {showNavLinks && (
         <nav className="nav-links">
-          {logado ? (
+          {isAuthenticated ? (
             <>
-              <Link href="/ver_mais" className="bag-icon" title="Ver Mais Produtos.">
-                <FaShoppingBag />
+              <Link href="/agendamentos" className="nav-link" title="Meus Agendamentos">
+                <FaCalendarAlt />
+                <span>Agendamentos</span>
               </Link>
-              <Link href="/lojas" className="store-icon" title="Ver Mais Lojas.">
-                <FaStore />
+              <Link href="/perfil" className="nav-link" title="Meu Perfil">
+                <FaUser />
+                <span>Perfil</span>
               </Link>
-              <Link href="/perfil" className="perfil-icon" title="Ver Perfil.">
-                <RiAccountCircleFill />
-              </Link>
-              <button onClick={handleLogout} className="logout-btn" title="Deslogar">
+              <button onClick={handleLogout} className="logout-btn" title="Sair">
                 <RiLogoutBoxRLine />
+                <span>Sair</span>
               </button>
             </>
           ) : (

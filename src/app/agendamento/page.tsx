@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginHeader from "@/components/LoginHeader";
 import LoginModal from "@/components/LoginModal";
+import Toast from "@/components/Toast";
 import { useAuth } from "@/hooks/useAuth";
 import "@/styles/app-css/agendamento.css";
 import "@/styles/components-css/login-modal.css";
@@ -23,6 +24,7 @@ export default function AgendamentoPage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentPrice, setCurrentPrice] = useState(preco);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
   // Hook de autenticação
   const { user, loading } = useAuth();
@@ -215,13 +217,16 @@ export default function AgendamentoPage() {
     }
     
     if (!selectedDate || !selectedTime || !selectedCategory) {
-      alert("Por favor, preencha todos os campos");
+      setToast({ message: "Por favor, preencha todos os campos", type: "warning" });
       return;
     }
 
     // Aqui você pode implementar a lógica de agendamento
-    alert("Agendamento realizado com sucesso!");
-    router.push("/");
+    setToast({ message: "Agendamento realizado com sucesso!", type: "success" });
+    
+    setTimeout(() => {
+      router.push("/");
+    }, 2000);
   };
 
   return (
@@ -388,6 +393,15 @@ export default function AgendamentoPage() {
         isOpen={showLoginModal} 
         onClose={() => setShowLoginModal(false)} 
       />
+
+      {/* Toast de notificação */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

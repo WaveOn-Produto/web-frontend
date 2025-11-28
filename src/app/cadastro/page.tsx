@@ -60,25 +60,12 @@ const RegisterPage: React.FC = () => {
     if (!form.password) {
       newErrors.password = "Informe a senha.";
       valid = false;
-    } else if (form.password.length < 6) {
-      newErrors.password = "A senha deve ter pelo menos 6 caracteres.";
+    } else if (form.password.length < 8) {
+      newErrors.password = "A senha deve ter pelo menos 8 caracteres com maiúsculas, minúsculas e números.";
       valid = false;
     }
 
-    if (!form.cellphone) {
-      newErrors.cellphone = "Informe o celular.";
-      valid = false;
-    }
-
-    if (!form.carne) {
-      newErrors.carne = "Selecione o tipo de carnê.";
-      valid = false;
-    }
-
-    if (!form.endereco) {
-      newErrors.endereco = "Selecione o endereço.";
-      valid = false;
-    }
+    // Campos opcionais: cellphone, carro e endereco não são obrigatórios para o backend
 
     setErrors(newErrors);
     return valid;
@@ -101,21 +88,33 @@ const RegisterPage: React.FC = () => {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    console.log("Formulário submetido!");
+    console.log("Dados do formulário:", form);
+    
     setSuccess("");
     setServerError("");
 
-    if (!validate()) return;
+    if (!validate()) {
+      console.log("Validação falhou");
+      return;
+    }
+
+    console.log("Validação passou, enviando para backend...");
 
     try {
-      const response = await apiClient.post<User>("/auth/register", {
-        name: form.name,
+      const payload = {
+        fullName: form.name,
+        username: form.email.split("@")[0],
         email: form.email,
         password: form.password,
-        cellphone: form.cellphone,
-        carne: form.carne,
-        endereco: form.endereco,
-      });
+      };
+      
+      console.log("Payload:", payload);
+      
+      const response = await apiClient.post<User>("/users", payload);
 
+      console.log("Resposta do backend:", response.data);
+      
       setSuccess("Conta criada com sucesso! Redirecionando para login...");
 
       // Redireciona para login após 2 segundos
@@ -123,6 +122,8 @@ const RegisterPage: React.FC = () => {
         window.location.href = "/login";
       }, 2000);
     } catch (error: any) {
+      console.error("Erro no cadastro:", error);
+      console.error("Detalhes do erro:", error.response?.data);
       const errorMessage = error.response?.data?.message || "Erro ao criar conta.";
       if (Array.isArray(errorMessage)) {
         setServerError(errorMessage.join(", "));

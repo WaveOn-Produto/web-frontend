@@ -2,29 +2,28 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #ffff;
+  background-color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 3rem;
-  height: 90px;
+  padding: 1.5rem 3rem;
+  min-height: 80px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .header.logo-only {
   justify-content: center;
-  background-color: #348fe2;
-  padding: 0.5rem 0;
+  background: linear-gradient(90deg, #3a94e7 0%, #1f66a6 100%);
+  padding: 1.5rem 0;
   width: 100%;
 }
 
 .header.logged {
-  background-color: #000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
 }
 
 .header.logged .nav-links a {
-  color: #fff;
+  color: #333;
 }
 
 /* Logo */
@@ -34,26 +33,29 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-}
-
-.logo-img {
-  height: 100%;
-  max-height: 40px;
-  width: auto;
-  object-fit: contain;
-  transform: none;
-}
-
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  font-family: "Inter", sans-serif;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
 }
 
 .logo:hover {
-  transform: translateY(-2px);
-  transition: transform 0.2s ease;
+  opacity: 0.85;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header.logo-only .logo-img {
+  filter: brightness(0) invert(1);
+}
+
+.logo-text {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  font-family: "Inter", sans-serif;
 }
 
 /* Navegação */
@@ -67,94 +69,81 @@
 /* Botões de Login / Cadastro (texto) */
 
 .login-btn {
-  width: 95px;
-  color: #348fe2;
-  border: 1px solid #348fe2;
+  padding: 0.6rem 1.5rem;
+  color: #3a94e7;
+  background: transparent;
+  border: 2px solid #3a94e7;
   text-align: center;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
+  border-radius: 8px;
   font-family: "Inter", sans-serif;
-  font-size: 14px;
+  font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .login-btn:hover {
+  background: #f0f8ff;
   transform: translateY(-2px);
 }
 
 .cadastro-btn {
-  width: 125px;
-  height: 35px;
+  padding: 0.6rem 1.5rem;
   text-align: center;
-  background: #2586e0;
+  background: #3a94e7;
   text-decoration: none;
-  color: #fff !important;
+  color: white !important;
   font-family: "Inter", sans-serif;
-  font-size: 14px;
-  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
   border-radius: 8px;
   font-weight: 600;
-  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.2);
+  border: 2px solid #3a94e7;
+  transition: all 0.3s ease;
 }
 
 .cadastro-btn:hover {
+  background: #1f66a6;
+  border-color: #1f66a6;
   transform: translateY(-2px);
 }
 
-/* Ícones (store, perfil, logout) */
+/* Links de navegação quando logado */
 
-.bag-icon,
-.store-icon,
-.perfil-icon,
+.nav-link,
 .logout-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: "Inter", sans-serif;
 }
 
-/* Ícones em estado normal */
-
-.bag-icon svg,
-.store-icon svg,
-.perfil-icon svg,
+.nav-link svg,
 .logout-btn svg {
-  color: #fff;
-  transition: color 0.2s ease;
+  font-size: 1.2rem;
+  color: #3a94e7;
 }
 
-.bag-icon svg,
-.store-icon svg,
-.logout-btn svg {
-  font-size: 1.6rem;
-}
-
-.perfil-icon svg {
-  font-size: 1.8rem;
-}
-
-/* Hover dos ícones */
-
-.bag-icon:hover,
-.store-icon:hover,
-.perfil-icon:hover,
+.nav-link:hover,
 .logout-btn:hover {
-  background: #414141;
+  background: #f0f0f0;
   transform: translateY(-2px);
 }
 
-.bag-icon:hover svg,
-.store-icon:hover svg,
-.perfil-icon:hover svg,
+.logout-btn:hover {
+  background: #fff0f0;
+  color: #ff4757;
+}
+
 .logout-btn:hover svg {
-  color: #60c040;
+  color: #ff4757;
 }
