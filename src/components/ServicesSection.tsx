@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function ServicesSection() {
   const handleAgendamento = (servico: string, preco: string) => {
     // Aqui você pode verificar se o usuário está logado
-    // Por enquanto, vamos direto para a página de agendamento
+
     return `/agendamento?servico=${encodeURIComponent(servico)}&preco=${encodeURIComponent(preco)}`;
   };
 
