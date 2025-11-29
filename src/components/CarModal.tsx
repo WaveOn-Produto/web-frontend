@@ -182,9 +182,10 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
               onChange={handleChange}
             >
               <option value="">Selecionar</option>
-              <option value="pequeno">Hatch</option>
-              <option value="medio">Suv</option>
-              <option value="grande">Sedan</option>
+              <option value="Hatch">Hatch</option>
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Caminhonete">Caminhonete</option>
             </select>
             {errors.category && <span className="modal-error">{errors.category}</span>}
          

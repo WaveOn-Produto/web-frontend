@@ -1,19 +1,111 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import apiClient from "@/services/api";
+import Toast from "@/components/Toast";
 import "@/styles/app-css/finalizacao.css";
 
 const FinalizacaoPage: React.FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, logout, loading } = useAuth();
+  
+  const servico = searchParams.get("servico") || "";
+  const data = searchParams.get("data") || "";
+  const horario = searchParams.get("horario") || "";
+  const categoria = searchParams.get("categoria") || "";
+  const preco = searchParams.get("preco") || "";
+  
   const [showPaymentCards, setShowPaymentCards] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState("");
-  const [selectedDate, setSelectedDate] = useState("15/12/2025");
-  const [selectedTime, setSelectedTime] = useState("15:00");
   const [selectedPayment, setSelectedPayment] = useState("");
+  const [userCars, setUserCars] = useState<any[]>([]);
+  const [userAddresses, setUserAddresses] = useState<any[]>([]);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
+  const [torneira, setTorneira] = useState(false);
+  const [tomada, setTomada] = useState(false);
+
+  // Redireciona para login se não estiver autenticado
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user && !loading) {
+        try {
+          const [carsResponse, addressesResponse] = await Promise.all([
+            apiClient.get("/cars/my"),
+            apiClient.get("/addresses/my")
+          ]);
+          setUserCars(carsResponse.data);
+          setUserAddresses(addressesResponse.data);
+        } catch (error: any) {
+          console.error("Erro ao carregar dados:", error);
+          // Só mostra erro se não for 401
+          if (error.response?.status !== 401) {
+            setToast({ 
+              message: "Erro ao carregar dados. Tente novamente.", 
+              type: "error" 
+            });
+          }
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user, loading]);
 
   const handleContinueInfo = () => {
+    if (!selectedAddress || !selectedVehicle) {
+      setToast({ message: "Por favor, selecione endereço e veículo", type: "warning" });
+      return;
+    }
     setShowPaymentCards(true);
+  };
+
+  const handleFinalizar = async () => {
+    if (!selectedPayment) {
+      setToast({ message: "Por favor, selecione um método de pagamento", type: "warning" });
+      return;
+    }
+
+    if (!torneira || !tomada) {
+      setToast({ message: "Por favor, confirme os itens necessários", type: "warning" });
+      return;
+    }
+
+    try {
+      const appointmentData = {
+        serviceType: servico,
+        date: data, // formato: YYYY-MM-DD
+        time: horario, // formato: HH:MM
+        carId: selectedVehicle,
+        addressId: selectedAddress,
+        vehicleCategory: categoria,
+      };
+
+      console.log("Enviando dados do agendamento:", appointmentData);
+
+      await apiClient.post("/appointments", appointmentData);
+      
+      setToast({ message: "Agendamento realizado com sucesso!", type: "success" });
+      
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Erro ao criar agendamento:", error);
+      console.error("Resposta do erro:", error.response?.data);
+      const errorMessage = error.response?.data?.message || "Erro ao criar agendamento. Tente novamente.";
+      setToast({ message: errorMessage, type: "error" });
+    }
   };
 
   return (
@@ -34,7 +126,7 @@ const FinalizacaoPage: React.FC = () => {
               <circle cx="12" cy="7" r="4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <button className="sair-button">Sair</button>
+          <button className="sair-button" onClick={logout}>Sair</button>
         </div>
       </header>
 
@@ -51,8 +143,17 @@ const FinalizacaoPage: React.FC = () => {
               onChange={(e) => setSelectedAddress(e.target.value)}
             >
               <option value="">Selecionar</option>
-              <option value="rua1">Rua Exemplo, 123 - Bairro</option>
+              {userAddresses.map((address) => (
+                <option key={address.id} value={address.id}>
+                  {address.street}, {address.number} - {address.neighborhood}
+                </option>
+              ))}
             </select>
+            {userAddresses.length === 0 && (
+              <p style={{fontSize: '12px', color: '#999', marginTop: '5px'}}>
+                Nenhum endereço cadastrado. <Link href="/perfil" style={{color: '#3b82f6'}}>Cadastre aqui</Link>
+              </p>
+            )}
           </div>
 
           <div className="info-section">
@@ -63,8 +164,17 @@ const FinalizacaoPage: React.FC = () => {
               onChange={(e) => setSelectedVehicle(e.target.value)}
             >
               <option value="">Selecionar</option>
-              <option value="carro1">Fiat Uno - ABC1234</option>
+              {userCars.map((car) => (
+                <option key={car.id} value={car.id}>
+                  {car.brand} {car.model} - {car.licensePlate}
+                </option>
+              ))}
             </select>
+            {userCars.length === 0 && (
+              <p style={{fontSize: '12px', color: '#999', marginTop: '5px'}}>
+                Nenhum veículo cadastrado. <Link href="/perfil" style={{color: '#3b82f6'}}>Cadastre aqui</Link>
+              </p>
+            )}
           </div>
 
           <div className="info-row">
@@ -73,8 +183,8 @@ const FinalizacaoPage: React.FC = () => {
               <input 
                 type="text" 
                 className="info-input"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
+                value={data ? data.split('-').reverse().join('/') : ''}
+                readOnly
               />
             </div>
             <div className="info-section">
@@ -82,25 +192,25 @@ const FinalizacaoPage: React.FC = () => {
               <input 
                 type="text" 
                 className="info-input"
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
+                value={horario}
+                readOnly
               />
             </div>
           </div>
 
           <div className="info-section">
             <label className="info-label">Nome</label>
-            <p className="info-text">João Pereira Silva</p>
+            <p className="info-text">{user?.name || 'Não informado'}</p>
           </div>
 
           <div className="info-section">
             <label className="info-label">Email</label>
-            <p className="info-text">joaopereira@gmail.com</p>
+            <p className="info-text">{user?.email || 'Não informado'}</p>
           </div>
 
           <div className="info-section">
             <label className="info-label">Celular</label>
-            <p className="info-text">(61)99999-2525</p>
+            <p className="info-text">{user?.phone || 'Não informado'}</p>
           </div>
 
           <button className="continuar-button" onClick={handleContinueInfo}>
@@ -160,33 +270,51 @@ const FinalizacaoPage: React.FC = () => {
             <h2 className="card-title">Finalizar Agendamento</h2>
             
             <div className="summary-section">
-              <p className="summary-label">Lavagem Completa</p>
+              <p className="summary-label">{servico}</p>
               <p className="summary-quantity">1x</p>
             </div>
 
             <div className="total-section">
               <p className="total-label">Total</p>
-              <p className="total-value">R$50</p>
+              <p className="total-value">R${preco}</p>
             </div>
 
             <div className="checklist-section">
               <p className="checklist-text">Para melhor atendê-los, pedimos que confirme os seguintes itens:</p>
               <div className="checklist-item">
-                <input type="checkbox" id="torneira" />
+                <input 
+                  type="checkbox" 
+                  id="torneira" 
+                  checked={torneira}
+                  onChange={(e) => setTorneira(e.target.checked)}
+                />
                 <label htmlFor="torneira">Torneira de fácil acesso</label>
               </div>
               <div className="checklist-item">
-                <input type="checkbox" id="tomada" />
+                <input 
+                  type="checkbox" 
+                  id="tomada" 
+                  checked={tomada}
+                  onChange={(e) => setTomada(e.target.checked)}
+                />
                 <label htmlFor="tomada">Tomada de fácil acesso</label>
               </div>
             </div>
 
-            <button className="continuar-button">
-              Continuar
+            <button className="continuar-button" onClick={handleFinalizar}>
+              Finalizar Agendamento
             </button>
           </div>
         )}
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

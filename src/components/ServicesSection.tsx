@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function ServicesSection() {
   const handleAgendamento = (servico: string, preco: string) => {
-    // Aqui você pode verificar se o usuário está logado
+    
 
     return `/agendamento?servico=${encodeURIComponent(servico)}&preco=${encodeURIComponent(preco)}`;
   };
@@ -18,16 +18,16 @@ export default function ServicesSection() {
         <div className="services-grid">
           <div className="service-card">
             <div className="service-image">
-              <img src="/images/services/detalhada1.PNG" alt="Lavagem Simples" />
+              <img src="/images/services/detalhada1.PNG" alt="Lavagem simples" />
             </div>
             <div className="service-content">
-              <h3 className="service-name">Lavagem Simples</h3>
+              <h3 className="service-name">Lavagem simples</h3>
               <p className="service-description">        
               • Externa<br/> • Interna <br/> • Aplicação Cera Líquida
               </p>
               <div className="service-price">A partir de R$ 80,00</div>
               <Link 
-                href={handleAgendamento("Lavagem Simples", "80,00")}
+                href={handleAgendamento("Lavagem simples", "80,00")}
                 className="service-button"
               >
                 Agendar
@@ -37,14 +37,14 @@ export default function ServicesSection() {
           
           <div className="service-card">
             <div className="service-image">
-              <img src="/images/services/detalhada2.png" alt="Lavagem Completa" />
+              <img src="/images/services/detalhada2.png" alt="Lavagem completa" />
             </div>
             <div className="service-content">
-              <h3 className="service-name">Lavagem Completa</h3>
+              <h3 className="service-name">Lavagem completa</h3>
               <p className="service-description">• Externa Detalhada<br/> • Interna Detalhada <br/> • Limpeza Detalhada dos Bancos <br/> • Revitalização de Plasticos</p>
               <div className="service-price">A partir de R$ 100,00</div>
               <Link 
-                href={handleAgendamento("Lavagem Completa", "100,00")}
+                href={handleAgendamento("Lavagem completa", "100,00")}
                 className="service-button"
               >
                 Agendar

@@ -1,66 +1,119 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import apiClient from "@/services/api";
 import "@/styles/app-css/agendamentos.css";
 
 interface Agendamento {
-  id: number;
-  servico: string;
-  data: string;
-  hora: string;
-  endereco: string;
-  veiculo: string;
-  status: "agendado" | "em_andamento" | "concluido" | "cancelado";
-  valor: number;
+  id: string;
+  serviceType: string;
+  date: string;
+  time: string;
+  priceCents: number;
+  status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
+  car: {
+    name: string;
+    plate: string;
+    brand: string;
+    model: string;
+  };
+  address: {
+    street: string;
+    number: string;
+    district: string;
+    city: string;
+  };
 }
 
 const AgendamentosPage: React.FC = () => {
-  const [agendamentos] = useState<Agendamento[]>([
-    {
-      id: 1,
-      servico: "Lavagem Completa",
-      data: "15/12/2025",
-      hora: "15:00",
-      endereco: "Rua Exemplo, 123 - Bairro",
-      veiculo: "Fiat Uno - ABC1234",
-      status: "agendado",
-      valor: 50
-    },
-    {
-      id: 2,
-      servico: "Lavagem Simples",
-      data: "10/12/2025",
-      hora: "10:00",
-      endereco: "Av. Principal, 456 - Centro",
-      veiculo: "Honda Civic - XYZ5678",
-      status: "concluido",
-      valor: 35
-    },
-    {
-      id: 3,
-      servico: "Lavagem Premium",
-      data: "20/12/2025",
-      hora: "14:00",
-      endereco: "Rua das Flores, 789 - Jardim",
-      veiculo: "Toyota Corolla - DEF9012",
-      status: "agendado",
-      valor: 80
+  const { user, loading } = useAuth();
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [loadingAgendamentos, setLoadingAgendamentos] = useState(true);
+
+  useEffect(() => {
+    if (!loading && user) {
+      fetchAgendamentos();
     }
-  ]);
+  }, [loading, user]);
+
+  const fetchAgendamentos = async () => {
+    try {
+      const response = await apiClient.get("/appointments/my");
+      setAgendamentos(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar agendamentos:", error);
+    } finally {
+      setLoadingAgendamentos(false);
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
+
+    try {
+      await apiClient.patch(`/appointments/${id}/cancel`);
+      fetchAgendamentos();
+    } catch (error) {
+      console.error("Erro ao cancelar agendamento:", error);
+      alert("Erro ao cancelar agendamento");
+    }
+  };
+
+  const handleRepeat = async (id: string) => {
+    try {
+      const response = await apiClient.get(`/appointments/${id}/repeat`);
+      const { serviceType, vehicleCategory, carId, addressId } = response.data;
+      
+      // Redireciona para página de agendamento com os dados pré-preenchidos
+      window.location.href = `/agendamento?servico=${serviceType}&categoria=${vehicleCategory}`;
+    } catch (error) {
+      console.error("Erro ao repetir agendamento:", error);
+      alert("Erro ao repetir agendamento");
+    }
+  };
+
+  if (loading || loadingAgendamentos) {
+    return (
+      <div className="agendamentos-page">
+        <div className="agendamentos-container">
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = "/login";
+    return null;
+  }
 
   const getStatusLabel = (status: string) => {
     const labels: { [key: string]: string } = {
-      agendado: "Agendado",
-      em_andamento: "Em Andamento",
-      concluido: "Concluído",
-      cancelado: "Cancelado"
+      SCHEDULED: "Agendado",
+      COMPLETED: "Concluído",
+      CANCELLED: "Cancelado"
     };
     return labels[status] || status;
   };
 
   const getStatusClass = (status: string) => {
-    return `status-badge status-${status}`;
+    const statusMap: { [key: string]: string } = {
+      SCHEDULED: "agendado",
+      COMPLETED: "concluido",
+      CANCELLED: "cancelado"
+    };
+    return `status-badge status-${statusMap[status] || status.toLowerCase()}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  const formatPrice = (priceCents: number) => {
+    return (priceCents / 100).toFixed(2);
   };
 
   return (
@@ -95,7 +148,7 @@ const AgendamentosPage: React.FC = () => {
           {agendamentos.map((agendamento) => (
             <div key={agendamento.id} className="agendamento-card">
               <div className="card-header">
-                <h3 className="servico-titulo">{agendamento.servico}</h3>
+                <h3 className="servico-titulo">{agendamento.serviceType}</h3>
                 <span className={getStatusClass(agendamento.status)}>
                   {getStatusLabel(agendamento.status)}
                 </span>
@@ -112,7 +165,7 @@ const AgendamentosPage: React.FC = () => {
                     </svg>
                     <div className="info-content">
                       <span className="info-label">Data e Hora</span>
-                      <span className="info-value">{agendamento.data} às {agendamento.hora}</span>
+                      <span className="info-value">{formatDate(agendamento.date)} às {agendamento.time}</span>
                     </div>
                   </div>
                 </div>
@@ -125,7 +178,7 @@ const AgendamentosPage: React.FC = () => {
                     </svg>
                     <div className="info-content">
                       <span className="info-label">Endereço</span>
-                      <span className="info-value">{agendamento.endereco}</span>
+                      <span className="info-value">{agendamento.address.street}, {agendamento.address.number} - {agendamento.address.district}, {agendamento.address.city}</span>
                     </div>
                   </div>
                 </div>
@@ -137,7 +190,7 @@ const AgendamentosPage: React.FC = () => {
                     </svg>
                     <div className="info-content">
                       <span className="info-label">Veículo</span>
-                      <span className="info-value">{agendamento.veiculo}</span>
+                      <span className="info-value">{agendamento.car.brand} {agendamento.car.model} - {agendamento.car.plate}</span>
                     </div>
                   </div>
                 </div>
@@ -145,18 +198,17 @@ const AgendamentosPage: React.FC = () => {
                 <div className="card-footer">
                   <div className="valor-total">
                     <span className="valor-label">Valor:</span>
-                    <span className="valor-value">R$ {agendamento.valor.toFixed(2)}</span>
+                    <span className="valor-value">R$ {formatPrice(agendamento.priceCents)}</span>
                   </div>
                   
                   <div className="card-actions">
-                    {agendamento.status === "agendado" && (
+                    {agendamento.status === "SCHEDULED" && (
                       <>
-                        <button className="btn-secondary">Reagendar</button>
-                        <button className="btn-danger">Cancelar</button>
+                        <button className="btn-danger" onClick={() => handleCancel(agendamento.id)}>Cancelar</button>
                       </>
                     )}
-                    {agendamento.status === "concluido" && (
-                      <button className="btn-primary">Agendar Novamente</button>
+                    {agendamento.status === "COMPLETED" && (
+                      <button className="btn-primary" onClick={() => handleRepeat(agendamento.id)}>Agendar Novamente</button>
                     )}
                   </div>
                 </div>

@@ -60,16 +60,11 @@ const LoginPage: React.FC = () => {
         password,
       });
       
-      // Usa o método login do AuthContext
-      if (response.data.access_token) {
-        login(response.data.access_token, response.data.user);
-      }
-      
+      login(response.data.access_token, response.data.user);
       setSuccess("Login realizado com sucesso! Redirecionando...");
       
-      // Redireciona para a home após 1 segundo
       setTimeout(() => {
-        router.push("/");
+        window.location.href = "/";
       }, 1000);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Erro ao realizar login.";

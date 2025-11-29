@@ -8,6 +8,7 @@ import CarModal from "@/components/CarModal";
 import AddressModal from "@/components/AddressModal";
 import Toast from "@/components/Toast";
 import { useAuthContext } from "@/contexts/AuthContext";
+import apiClient from "@/services/api";
 import "@/styles/app-css/perfil.css";
 
 interface Car {
@@ -57,11 +58,42 @@ export default function PerfilPage() {
 
   useEffect(() => {
     if (user) {
-      setFullName(user.fullName || "");
+      setFullName(user.name || "");
       setEmail(user.email || "");
       setPhone(user.phone || "");
+      
+      // Busca carros e endereços do backend
+      fetchCarsAndAddresses();
     }
   }, [user]);
+
+  const fetchCarsAndAddresses = async () => {
+    try {
+      const [carsResponse, addressesResponse] = await Promise.all([
+        apiClient.get("/cars/my"),
+        apiClient.get("/addresses/my")
+      ]);
+      
+      setCars(carsResponse.data.map((car: any) => ({
+        id: car.id,
+        marca: car.brand,
+        modelo: car.model,
+        placa: car.plate || car.licensePlate,
+      })));
+      
+      setAddresses(addressesResponse.data.map((addr: any) => ({
+        id: addr.id,
+        rua: addr.street,
+        numero: addr.number,
+        bairro: addr.district || addr.neighborhood,
+        cidade: addr.city,
+        estado: addr.state || "",
+        cep: addr.cep,
+      })));
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    }
+  };
 
   const handleSaveName = () => {
     if (!fullName.trim()) {
@@ -94,24 +126,60 @@ export default function PerfilPage() {
     setToast({ message: "Funcionalidade em desenvolvimento", type: "warning" });
   };
 
-  const handleAddCar = (carData: any) => {
-    const newCar: Car = {
-      id: Date.now().toString(),
-      ...carData
-    };
-    setCars([...cars, newCar]);
-    setShowCarModal(false);
-    setToast({ message: "Veículo adicionado com sucesso!", type: "success" });
+  const handleAddCar = async (carData: any) => {
+    try {
+      const response = await apiClient.post("/cars", carData);
+      
+      const newCar: Car = {
+        id: response.data.id,
+        marca: response.data.brand,
+        modelo: response.data.model,
+        placa: response.data.plate || response.data.licensePlate,
+      };
+      
+      setCars([...cars, newCar]);
+      setShowCarModal(false);
+      setToast({ message: "Veículo adicionado com sucesso!", type: "success" });
+    } catch (error: any) {
+      console.error("Erro ao adicionar veículo:", error);
+      setToast({ 
+        message: error.response?.data?.message || "Erro ao adicionar veículo", 
+        type: "error" 
+      });
+    }
   };
 
-  const handleAddAddress = (addressData: any) => {
-    const newAddress: Address = {
-      id: Date.now().toString(),
-      ...addressData
-    };
-    setAddresses([...addresses, newAddress]);
-    setShowAddressModal(false);
-    setToast({ message: "Endereço adicionado com sucesso!", type: "success" });
+  const handleAddAddress = async (addressData: any) => {
+    try {
+      const response = await apiClient.post("/addresses", {
+        cep: addressData.cep,
+        street: addressData.rua,
+        number: addressData.numero,
+        complement: addressData.complemento,
+        district: addressData.bairro,
+        city: addressData.cidade,
+      });
+      
+      const newAddress: Address = {
+        id: response.data.id,
+        rua: response.data.street,
+        numero: response.data.number,
+        bairro: response.data.district || response.data.neighborhood,
+        cidade: response.data.city,
+        estado: response.data.state || "",
+        cep: response.data.cep,
+      };
+      
+      setAddresses([...addresses, newAddress]);
+      setShowAddressModal(false);
+      setToast({ message: "Endereço adicionado com sucesso!", type: "success" });
+    } catch (error: any) {
+      console.error("Erro ao adicionar endereço:", error);
+      setToast({ 
+        message: error.response?.data?.message || "Erro ao adicionar endereço", 
+        type: "error" 
+      });
+    }
   };
 
   if (loading) {

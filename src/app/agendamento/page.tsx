@@ -6,6 +6,7 @@ import NavBar from "@/components/NavBar";
 import LoginModal from "@/components/LoginModal";
 import Toast from "@/components/Toast";
 import { useAuth } from "@/hooks/useAuth";
+import apiClient from "@/services/api";
 import "@/styles/app-css/agendamento.css";
 import "@/styles/components-css/login-modal.css";
 
@@ -13,10 +14,10 @@ export default function AgendamentoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const servico = searchParams.get("servico") || "Lavagem Simples";
+  const servico = searchParams.get("servico") || "Lavagem simples";
   const preco = searchParams.get("preco") || "50,00";
   
-  const servicoImage = servico === "Lavagem Completa" 
+  const servicoImage = servico === "Lavagem completa" 
     ? "/images/services/detalhada2.png" 
     : "/images/services/detalhada1.PNG";
   
@@ -106,40 +107,43 @@ export default function AgendamentoPage() {
   const canGoNext = diffToNextMonth <= 7;
 
 
-  const getAvailableTimeSlots = (date: string) => {
+  const getAvailableTimeSlots = async (date: string) => {
     const allSlots = ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
     
-    const existingBookings: { [key: string]: string[] } = {
-      "2025-11-29": ["09:00"],
-      "2025-11-30": ["14:00"],
-    };
-    
-    const bookedSlots = existingBookings[date] || [];
+    try {
+      // Busca agendamentos do dia selecionado
+      const response = await apiClient.get(`/appointments/available-slots?date=${date}`);
+      const bookedSlots = response.data.bookedSlots || [];
 
-    if (bookedSlots.length === 0) {
-      return allSlots;
-    }
-
-    const availableSlots = allSlots.filter(slot => {
-      if (bookedSlots.includes(slot)) {
-        return false;
+      if (bookedSlots.length === 0) {
+        return allSlots;
       }
 
-      const currentTime = parseTime(slot);
-      
-      for (const bookedSlot of bookedSlots) {
-        const bookedTime = parseTime(bookedSlot);
-        const timeDiff = Math.abs(currentTime - bookedTime);
-
-        if (timeDiff < 240) {
+      const availableSlots = allSlots.filter(slot => {
+        if (bookedSlots.includes(slot)) {
           return false;
         }
-      }
+
+        const currentTime = parseTime(slot);
+        
+        for (const bookedSlot of bookedSlots) {
+          const bookedTime = parseTime(bookedSlot);
+          const timeDiff = Math.abs(currentTime - bookedTime);
+
+          if (timeDiff < 240) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
       
-      return true;
-    });
-    
-    return availableSlots;
+      return availableSlots;
+    } catch (error) {
+      console.error("Erro ao buscar horários disponíveis:", error);
+      // Em caso de erro, retorna todos os slots
+      return allSlots;
+    }
   };
 
 
@@ -151,32 +155,33 @@ export default function AgendamentoPage() {
 
   useEffect(() => {
     if (selectedDate) {
-      const available = getAvailableTimeSlots(selectedDate);
-      setAvailableSlots(available);
-      setSelectedTime("");
+      getAvailableTimeSlots(selectedDate).then(available => {
+        setAvailableSlots(available);
+        setSelectedTime("");
+      });
     }
   }, [selectedDate]);
 
   const categories = [
     "Hatch",
     "Sedan",
-    "Suv",
+    "SUV",
     "Caminhonete"
   ];
 
   const fetchPriceByCategory = async (category: string, serviceType: string) => {
     const priceMap: { [key: string]: { [key: string]: string } } = {
-      "Lavagem Simples": {
+      "Lavagem simples": {
         "Hatch": "80,00",
         "Sedan": "90,00",
         "SUV": "95,00",
-        "caminhonete": "120,00"
+        "Caminhonete": "120,00"
       },
-      "Lavagem Completa": {
+      "Lavagem completa": {
         "Hatch": "100,00",
         "Sedan": "110,00",
         "SUV": "115,00",
-        "caminhonete": "150,00"
+        "Caminhonete": "150,00"
       }
     };
     
@@ -195,7 +200,7 @@ export default function AgendamentoPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) {
@@ -208,11 +213,16 @@ export default function AgendamentoPage() {
       return;
     }
 
-    setToast({ message: "Agendamento realizado com sucesso!", type: "success" });
+    // Redireciona para página de finalização com os dados do agendamento
+    const params = new URLSearchParams({
+      servico,
+      data: selectedDate,
+      horario: selectedTime,
+      categoria: selectedCategory,
+      preco: currentPrice
+    });
     
-    setTimeout(() => {
-      router.push("/");
-    }, 2000);
+    router.push(`/finalizacao?${params.toString()}`);
   };
 
   return (
@@ -359,7 +369,7 @@ export default function AgendamentoPage() {
               </div>
 
               <button type="submit" className="agendar-button">
-                Agendar
+                Continuar
               </button>
             </form>
           </div>

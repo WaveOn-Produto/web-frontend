@@ -103,15 +103,15 @@ const RegisterPage: React.FC = () => {
 
     try {
       const payload = {
-        fullName: form.name,
-        username: form.email.split("@")[0],
+        name: form.name,
         email: form.email,
         password: form.password,
+        phone: form.cellphone || undefined,
       };
       
       console.log("Payload:", payload);
       
-      const response = await apiClient.post<User>("/users", payload);
+      const response = await apiClient.post<User>("/users/register", payload);
 
       console.log("Resposta do backend:", response.data);
       
