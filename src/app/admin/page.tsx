@@ -1,65 +1,58 @@
 "use client";
 
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
+import apiClient from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 import "@/styles/app-css/admin.css";
 
 export default function AdminDashboard() {
-  const stats = [
-    {
-      title: "Agendamentos Hoje",
-      value: "8",
-      icon: "📅",
-      color: "#3a94e7",
-    },
-    {
-      title: "Pendentes",
-      value: "12",
-      icon: "⏰",
-      color: "#f59e0b",
-    },
-    {
-      title: "Concluídos (Mês)",
-      value: "145",
-      icon: "✅",
-      color: "#10b981",
-    },
-    {
-      title: "Receita (Mês)",
-      value: "R$ 14.500",
-      icon: "💰",
-      color: "#8b5cf6",
-    },
-  ];
+  const { user, token } = useAuth();
+  const [stats, setStats] = useState([
+    { title: "Agendamentos Hoje", value: "-", icon: "📅", color: "#3a94e7" },
+    { title: "Pendentes", value: "-", icon: "⏰", color: "#f59e0b" },
+    { title: "Concluídos (Mês)", value: "-", icon: "✅", color: "#10b981" },
+    { title: "Receita (Mês)", value: "-", icon: "💰", color: "#8b5cf6" },
+  ]);
+  const [recentAppointments, setRecentAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentAppointments = [
-    {
-      id: 1,
-      cliente: "João Silva",
-      servico: "Lavagem completa",
-      horario: "09:00",
-      status: "SCHEDULED",
-    },
-    {
-      id: 2,
-      cliente: "Maria Santos",
-      servico: "Lavagem simples",
-      horario: "10:00",
-      status: "SCHEDULED",
-    },
-    {
-      id: 3,
-      cliente: "Pedro Costa",
-      servico: "Lavagem completa",
-      horario: "14:00",
-      status: "SCHEDULED",
-    },
-  ];
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        // Busca todos agendamentos do admin
+        const res = await apiClient.get("/appointments/admin/all");
+        const appointments = res.data;
+
+        // Calcula indicadores
+        const today = new Date().toISOString().slice(0, 10);
+        const agendamentosHoje = appointments.filter((a: any) => a.date?.slice(0, 10) === today);
+        const pendentes = appointments.filter((a: any) => a.status === "SCHEDULED");
+        const concluidosMes = appointments.filter((a: any) => a.status === "COMPLETED" && a.date?.slice(0, 7) === today.slice(0, 7));
+        const receitaMes = concluidosMes.reduce((acc: number, a: any) => acc + (a.price || 0), 0);
+
+        setStats([
+          { title: "Agendamentos Hoje", value: agendamentosHoje.length.toString(), icon: "📅", color: "#3a94e7" },
+          { title: "Pendentes", value: pendentes.length.toString(), icon: "⏰", color: "#f59e0b" },
+          { title: "Concluídos (Mês)", value: concluidosMes.length.toString(), icon: "✅", color: "#10b981" },
+          { title: "Receita (Mês)", value: `R$ ${receitaMes.toLocaleString("pt-BR")}`, icon: "💰", color: "#8b5cf6" },
+        ]);
+
+        // Lista agendamentos de hoje para tabela
+        setRecentAppointments(agendamentosHoje);
+      } catch (err) {
+        // Em caso de erro, mantém valores default
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="admin-layout">
       <AdminSidebar />
-      
       <main className="admin-content">
         <div className="admin-header">
           <h1 className="page-title">Dashboard</h1>
@@ -94,20 +87,26 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentAppointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td>{appointment.cliente}</td>
-                    <td>{appointment.servico}</td>
-                    <td>{appointment.horario}</td>
-                    <td>
-                      <span className="badge badge-scheduled">Agendado</span>
-                    </td>
-                    <td>
-                      <button className="btn-icon">👁️</button>
-                      <button className="btn-icon">✏️</button>
-                    </td>
-                  </tr>
-                ))}
+                {loading ? (
+                  <tr><td colSpan={5}>Carregando...</td></tr>
+                ) : recentAppointments.length === 0 ? (
+                  <tr><td colSpan={5}>Nenhum agendamento hoje.</td></tr>
+                ) : (
+                  recentAppointments.map((appointment: any) => (
+                    <tr key={appointment.id}>
+                      <td>{appointment.user?.name || "-"}</td>
+                      <td>{appointment.serviceName || appointment.service || "-"}</td>
+                      <td>{appointment.time || appointment.date?.slice(11, 16) || "-"}</td>
+                      <td>
+                        <span className={`badge badge-${appointment.status?.toLowerCase()}`}>{appointment.status === "SCHEDULED" ? "Agendado" : appointment.status === "COMPLETED" ? "Concluído" : appointment.status}</span>
+                      </td>
+                      <td>
+                        <button className="btn-icon">👁️</button>
+                        <button className="btn-icon">✏️</button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

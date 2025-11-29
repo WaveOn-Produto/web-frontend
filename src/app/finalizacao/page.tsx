@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/services/api";
 import Toast from "@/components/Toast";
+import AlertInfo from "@/components/AlertInfo";
 import "@/styles/app-css/finalizacao.css";
 
 const FinalizacaoPage: React.FC = () => {
@@ -150,9 +151,13 @@ const FinalizacaoPage: React.FC = () => {
               ))}
             </select>
             {userAddresses.length === 0 && (
-              <p style={{fontSize: '12px', color: '#999', marginTop: '5px'}}>
-                Nenhum endereço cadastrado. <Link href="/perfil" style={{color: '#3b82f6'}}>Cadastre aqui</Link>
-              </p>
+              <AlertInfo 
+                message="Nenhum endereço cadastrado."
+                linkText="Cadastre aqui"
+                linkHref="/perfil"
+                icon="📍"
+                color="#f59e0b"
+              />
             )}
           </div>
 
@@ -171,9 +176,13 @@ const FinalizacaoPage: React.FC = () => {
               ))}
             </select>
             {userCars.length === 0 && (
-              <p style={{fontSize: '12px', color: '#999', marginTop: '5px'}}>
-                Nenhum veículo cadastrado. <Link href="/perfil" style={{color: '#3b82f6'}}>Cadastre aqui</Link>
-              </p>
+              <AlertInfo 
+                message="Nenhum veículo cadastrado."
+                linkText="Cadastre aqui"
+                linkHref="/perfil"
+                icon="🚗"
+                color="#3a94e7"
+              />
             )}
           </div>
 

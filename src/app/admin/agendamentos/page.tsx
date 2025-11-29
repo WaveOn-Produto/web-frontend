@@ -114,7 +114,8 @@ export default function AdminAgendamentos() {
     return date.toLocaleDateString("pt-BR");
   };
 
-  const formatPrice = (priceCents: number) => {
+  const formatPrice = (priceCents: number | null | undefined) => {
+    if (typeof priceCents !== 'number' || isNaN(priceCents)) return '--';
     return (priceCents / 100).toFixed(2);
   };
 
@@ -290,7 +291,7 @@ export default function AdminAgendamentos() {
                         {formatDate(appointment.date)} às {appointment.timeSlot}
                       </td>
                       <td>{appointment.car.brand} {appointment.car.model} - {appointment.car.licensePlate}</td>
-                      <td className="price-cell">R$ {formatPrice(appointment.totalPrice)}</td>
+                      <td className="price-cell">R$ {formatPrice(appointment.priceCents)}</td>
                       <td>
                         <span className={`badge ${getStatusClass(appointment.status)}`}>
                           {getStatusLabel(appointment.status)}
@@ -365,38 +366,38 @@ export default function AdminAgendamentos() {
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Categoria do Veículo:</span>
-                  <span className="detail-value">{selectedAppointment.vehicleCategory}</span>
+                  <span className="detail-value">{selectedAppointment.car?.category || '--'}</span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Data/Hora:</span>
                   <span className="detail-value">
-                    {formatDate(selectedAppointment.date)} às {selectedAppointment.timeSlot}
+                    {formatDate(selectedAppointment.date)}{selectedAppointment.time ? ` às ${selectedAppointment.time}` : ''}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Veículo:</span>
                   <span className="detail-value">
-                    {selectedAppointment.car.brand} {selectedAppointment.car.model}
+                    {selectedAppointment.car?.name || ''} {selectedAppointment.car?.brand || ''} {selectedAppointment.car?.model || ''}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Placa:</span>
-                  <span className="detail-value">{selectedAppointment.car.licensePlate}</span>
+                  <span className="detail-value">{selectedAppointment.car?.plate || '--'}</span>
                 </div>
                 <div className="detail-item full-width">
                   <span className="detail-label">Endereço:</span>
                   <span className="detail-value">
-                    {selectedAppointment.address.street}, {selectedAppointment.address.number}
-                    {selectedAppointment.address.complement && ` - ${selectedAppointment.address.complement}`}
+                    {selectedAppointment.address?.street}, {selectedAppointment.address?.number}
+                    {selectedAppointment.address?.complement && ` - ${selectedAppointment.address.complement}`}
                     <br />
-                    {selectedAppointment.address.neighborhood} - {selectedAppointment.address.city}/{selectedAppointment.address.state}
+                    {selectedAppointment.address?.neighborhood} - {selectedAppointment.address?.city}/{selectedAppointment.address?.state}
                     <br />
-                    CEP: {selectedAppointment.address.zipCode}
+                    CEP: {selectedAppointment.address?.cep || '--'}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Valor:</span>
-                  <span className="detail-value">R$ {formatPrice(selectedAppointment.totalPrice)}</span>
+                  <span className="detail-value">R$ {formatPrice(selectedAppointment.priceCents)}</span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Status:</span>
@@ -412,8 +413,8 @@ export default function AdminAgendamentos() {
                 )}
               </div>
 
-              <div className="modal-actions">
-                <button className="btn-secondary" onClick={() => setShowModal(false)}>
+              <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
+                <button className="btn-secondary" style={{ minWidth: 100, padding: '8px 20px', borderRadius: 6 }} onClick={() => setShowModal(false)}>
                   Fechar
                 </button>
               </div>

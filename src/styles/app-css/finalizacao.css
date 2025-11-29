@@ -48,6 +48,12 @@
   align-items: center;
 }
 
+.alert-info {
+  box-shadow: 0 2px 8px rgba(58, 148, 231, 0.07);
+  transition: box-shadow 0.2s;
+  margin: 8px 0;
+}
+
 .icon-button {
   background: transparent;
   border: 2px solid white;
