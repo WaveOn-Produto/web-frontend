@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { FaCalendarAlt, FaUser } from "react-icons/fa";
 import { RiLogoutBoxRLine } from "react-icons/ri";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 interface NavBarProps {
   showNavLinks?: boolean;
@@ -43,6 +44,12 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
         <nav className="nav-links">
           {isAuthenticated ? (
             <>
+              {user?.role === 'ADMIN' && (
+                <Link href="/admin" className="nav-link admin-link" title="Painel Admin">
+                  <MdAdminPanelSettings />
+                  <span>Painel Admin</span>
+                </Link>
+              )}
               <Link href="/agendamentos" className="nav-link" title="Meus Agendamentos">
                 <FaCalendarAlt />
                 <span>Agendamentos</span>

@@ -31,12 +31,22 @@ const AgendamentosPage: React.FC = () => {
   const { user, loading } = useAuth();
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [loadingAgendamentos, setLoadingAgendamentos] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     if (!loading && user) {
       fetchAgendamentos();
     }
   }, [loading, user]);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const fetchAgendamentos = async () => {
     try {
@@ -49,15 +59,24 @@ const AgendamentosPage: React.FC = () => {
     }
   };
 
-  const handleCancel = async (id: string) => {
-    if (!confirm("Tem certeza que deseja cancelar este agendamento?")) return;
+  const handleCancelClick = (id: string) => {
+    setAppointmentToCancel(id);
+    setShowCancelModal(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!appointmentToCancel) return;
 
     try {
-      await apiClient.patch(`/appointments/${id}/cancel`);
+      await apiClient.patch(`/appointments/${appointmentToCancel}/cancel`);
+      setToast({ message: "Agendamento cancelado com sucesso!", type: "success" });
       fetchAgendamentos();
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
-      alert("Erro ao cancelar agendamento");
+      setToast({ message: "Erro ao cancelar agendamento", type: "error" });
+    } finally {
+      setShowCancelModal(false);
+      setAppointmentToCancel(null);
     }
   };
 
@@ -70,7 +89,7 @@ const AgendamentosPage: React.FC = () => {
       window.location.href = `/agendamento?servico=${serviceType}&categoria=${vehicleCategory}`;
     } catch (error) {
       console.error("Erro ao repetir agendamento:", error);
-      alert("Erro ao repetir agendamento");
+      setToast({ message: "Erro ao repetir agendamento", type: "error" });
     }
   };
 
@@ -204,7 +223,7 @@ const AgendamentosPage: React.FC = () => {
                   <div className="card-actions">
                     {agendamento.status === "SCHEDULED" && (
                       <>
-                        <button className="btn-danger" onClick={() => handleCancel(agendamento.id)}>Cancelar</button>
+                        <button className="btn-danger" onClick={() => handleCancelClick(agendamento.id)}>Cancelar</button>
                       </>
                     )}
                     {agendamento.status === "COMPLETED" && (
@@ -233,6 +252,31 @@ const AgendamentosPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Confirmação de Cancelamento */}
+      {showCancelModal && (
+        <div className="modal-overlay" onClick={() => setShowCancelModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Cancelar Agendamento</h3>
+            <p className="modal-message">Tem certeza que deseja cancelar este agendamento?</p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setShowCancelModal(false)}>
+                Voltar
+              </button>
+              <button className="btn-danger" onClick={confirmCancel}>
+                Sim, Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast de Feedback */}
+      {toast && (
+        <div className={`toast toast-${toast.type}`}>
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 };

@@ -147,3 +147,21 @@
 .logout-btn:hover svg {
   color: #ff4757;
 }
+
+/* Link especial para Admin */
+.nav-link.admin-link {
+  background: linear-gradient(135deg, #3a94e7 0%, #1f66a6 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.nav-link.admin-link svg {
+  color: white;
+  font-size: 1.3rem;
+}
+
+.nav-link.admin-link:hover {
+  background: linear-gradient(135deg, #2b7fd9 0%, #185a95 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(58, 148, 231, 0.4);
+}
