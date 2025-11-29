@@ -54,12 +54,16 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 70%;
 }
 
 /* CONTEÚDO DO CARD */
 .service-content {
   padding: 24px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
 }
 
 .service-name {
@@ -75,6 +79,7 @@
   color: #6c757d;
   margin-bottom: 20px;
   font-family: var(--font-inter), sans-serif;
+  min-height: 80px;
 }
 
 .service-price {
@@ -86,7 +91,7 @@
 }
 
 .service-button {
-  background: #348FE2;
+  background: #348fe2;
   color: white;
   border: none;
   padding: 12px 40px;
@@ -98,7 +103,9 @@
   font-family: var(--font-inter), sans-serif;
   width: 100%;
   max-width: 200px;
-  text-decoration:none;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0 auto;
 }
 
 .service-button:hover {

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:3001"
+  baseURL: "http://localhost:3001/api"
 });
 
 // Interceptor para adicionar o token JWT automaticamente
@@ -26,13 +26,17 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token inválido ou expirado
       if (typeof window !== 'undefined') {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        // Redireciona para login se não estiver na página de login/cadastro
-        if (!window.location.pathname.includes('/login') && 
-            !window.location.pathname.includes('/cadastro')) {
+        const currentPath = window.location.pathname;
+        const isPublicRoute = currentPath === '/' || 
+                             currentPath.includes('/login') || 
+                             currentPath.includes('/cadastro');
+        
+        // Só limpa localStorage e redireciona se for uma rota pública
+        // Para rotas protegidas, deixa o componente lidar com o erro
+        if (isPublicRoute) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
           window.location.href = "/login";
         }
       }

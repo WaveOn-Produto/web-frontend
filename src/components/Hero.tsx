@@ -1,7 +1,15 @@
-// src/components/Hero.tsx
+"use client";
+
 import React from "react";
 
 export default function Hero() {
+  const scrollToServices = () => {
+    const servicesSection = document.querySelector('.services-section');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <section className="hero-automotive">
       <div className="hero-content">
@@ -13,7 +21,7 @@ export default function Hero() {
           Somos Especialistas em lavagem de veículos em domicílio com<br />
           Qualidade, Segurança e Conveniência
         </p>
-        <button className="hero-button">
+        <button className="hero-button" onClick={scrollToServices}>
           Agendar
         </button>
       </div>
