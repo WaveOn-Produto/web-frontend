@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import NavBar from "@/components/NavBar";
 import LoginModal from "@/components/LoginModal";
@@ -29,6 +29,7 @@ export default function AgendamentoPage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentPrice, setCurrentPrice] = useState(preco);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const redirectPathRef = useRef<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
 
@@ -202,17 +203,15 @@ export default function AgendamentoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!user) {
+      redirectPathRef.current = window.location.pathname + window.location.search;
       setShowLoginModal(true);
       return;
     }
-    
     if (!selectedDate || !selectedTime || !selectedCategory) {
       setToast({ message: "Por favor, preencha todos os campos", type: "warning" });
       return;
     }
-
     // Redireciona para página de finalização com os dados do agendamento
     const params = new URLSearchParams({
       servico,
@@ -221,9 +220,16 @@ export default function AgendamentoPage() {
       categoria: selectedCategory,
       preco: currentPrice
     });
-    
     router.push(`/finalizacao?${params.toString()}`);
   };
+  // Redireciona para a rota salva após login
+  useEffect(() => {
+    if (user && showLoginModal && redirectPathRef.current) {
+      router.push(redirectPathRef.current);
+      redirectPathRef.current = null;
+      setShowLoginModal(false);
+    }
+  }, [user, showLoginModal, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">

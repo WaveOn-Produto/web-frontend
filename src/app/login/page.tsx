@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LoginHeader from "@/components/LoginHeader";
@@ -12,6 +13,7 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,7 +66,12 @@ const LoginPage: React.FC = () => {
       setSuccess("Login realizado com sucesso! Redirecionando...");
       
       setTimeout(() => {
-        window.location.href = "/";
+        const redirect = searchParams.get('redirect');
+        if (redirect) {
+          window.location.href = redirect;
+        } else {
+          window.location.href = "/";
+        }
       }, 1000);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || "Erro ao realizar login.";

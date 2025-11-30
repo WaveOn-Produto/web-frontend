@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface LoginModalProps {
@@ -7,6 +7,14 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const [redirectUrl, setRedirectUrl] = useState("/");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setRedirectUrl(window.location.pathname + window.location.search);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -15,15 +23,19 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         <button className="modal-close-btn" onClick={onClose}>
           ×
         </button>
-        
         <div className="modal-body">
           <h2 className="modal-title">Você não está logado(a)</h2>
-          
           <div className="modal-buttons">
-            <Link href="/login" className="modal-btn modal-btn-login">
+            <Link
+              href={`/login?redirect=${encodeURIComponent(redirectUrl)}`}
+              className="modal-btn modal-btn-login"
+            >
               Login
             </Link>
-            <Link href="/cadastro" className="modal-btn modal-btn-register">
+            <Link
+              href={`/cadastro?redirect=${encodeURIComponent(redirectUrl)}`}
+              className="modal-btn modal-btn-register"
+            >
               Cadastre-se
             </Link>
           </div>
