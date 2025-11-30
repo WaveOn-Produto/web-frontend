@@ -265,6 +265,13 @@ export default function AgendamentoPage() {
     setSelectedCategory(category);
     setCategoryError("");
 
+    if (!user) {
+      setCategoryError(
+        "Você precisa estar logado para agendar. Clique em Continuar para fazer login ou cadastro."
+      );
+      return;
+    }
+
     if (category) {
       const newPrice = await fetchPriceByCategory(category, servico);
       setCurrentPrice(newPrice);
@@ -487,9 +494,15 @@ export default function AgendamentoPage() {
                     gap: "8px",
                     margin: "12px 0 0 0",
                     padding: "12px 18px",
-                    background: "#fff6f6",
-                    color: "#c62828",
-                    border: "1px solid #f5c2c7",
+                    background: categoryError.includes("logado")
+                      ? "#fffbe6"
+                      : "#fff6f6",
+                    color: categoryError.includes("logado")
+                      ? "#eab308"
+                      : "#c62828",
+                    border: categoryError.includes("logado")
+                      ? "1px solid #fde68a"
+                      : "1px solid #f5c2c7",
                     borderRadius: "8px",
                     fontWeight: "500",
                     fontSize: "0.75rem",
@@ -505,14 +518,30 @@ export default function AgendamentoPage() {
                     style={{ flexShrink: 0 }}
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <circle cx="12" cy="12" r="12" fill="#f5c2c7" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="12"
+                      fill={
+                        categoryError.includes("logado") ? "#fde68a" : "#f5c2c7"
+                      }
+                    />
                     <path
                       d="M12 7v5"
-                      stroke="#c62828"
+                      stroke={
+                        categoryError.includes("logado") ? "#eab308" : "#c62828"
+                      }
                       strokeWidth="2"
                       strokeLinecap="round"
                     />
-                    <circle cx="12" cy="16" r="1.2" fill="#c62828" />
+                    <circle
+                      cx="12"
+                      cy="16"
+                      r="1.2"
+                      fill={
+                        categoryError.includes("logado") ? "#eab308" : "#c62828"
+                      }
+                    />
                   </svg>
                   <span>{categoryError}</span>
                 </div>
@@ -520,7 +549,14 @@ export default function AgendamentoPage() {
               <button
                 type="submit"
                 className="agendar-button"
-                disabled={!!categoryError}
+                disabled={!!categoryError && !categoryError.includes('logado')}
+                onClick={(e) => {
+                  if (!user && categoryError.includes('logado')) {
+                    e.preventDefault();
+                    redirectPathRef.current = window.location.pathname + window.location.search;
+                    setShowLoginModal(true);
+                  }
+                }}
               >
                 Continuar
               </button>
