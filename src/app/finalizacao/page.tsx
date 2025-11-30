@@ -389,11 +389,15 @@ const FinalizacaoPage: React.FC = () => {
       </div>
 
       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <div
+          style={{ position: "fixed", top: 100, right: "2rem", zIndex: 9999 }}
+        >
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        </div>
       )}
     </div>
   );

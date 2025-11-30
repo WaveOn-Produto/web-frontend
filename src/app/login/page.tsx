@@ -55,18 +55,17 @@ const LoginPage: React.FC = () => {
     setSuccess("");
 
     if (!validate()) return;
-    
+
     try {
       const response = await apiClient.post<LoginResponse>("/auth/login", {
         email,
         password,
       });
-      
+      console.log("Resposta do backend:", response.data);
       login(response.data.access_token, response.data.user);
       setSuccess("Login realizado com sucesso! Redirecionando...");
-      
       setTimeout(() => {
-        const redirect = searchParams.get('redirect');
+        const redirect = searchParams.get("redirect");
         if (redirect) {
           window.location.href = redirect;
         } else {
@@ -74,7 +73,8 @@ const LoginPage: React.FC = () => {
         }
       }, 1000);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Erro ao realizar login.";
+      const errorMessage =
+        error.response?.data?.message || "Erro ao realizar login.";
       if (error.response?.status === 401) {
         setServerError("Email ou senha incorretos.");
       } else {
@@ -87,78 +87,86 @@ const LoginPage: React.FC = () => {
     <>
       <LoginHeader />
       <main className="login-root">
-        <section className="login-illustration">
-      </section>
+        <section className="login-illustration"></section>
 
-      <section className="login-card" aria-labelledby="login-title">
-        <form
-          className="login-form"
-          aria-describedby="login-description"
-          onSubmit={handleSubmit}
-          noValidate
-        >
-          <header className="login-header">
-            <h1 id="login-title" className="login-title">
-              Login
-            </h1>
-          </header>
+        <section className="login-card" aria-labelledby="login-title">
+          <form
+            className="login-form"
+            aria-describedby="login-description"
+            onSubmit={handleSubmit}
+            noValidate
+          >
+            <header className="login-header">
+              <h1 id="login-title" className="login-title">
+                Login
+              </h1>
+            </header>
 
-          {serverError && <p className="form-error">{serverError}</p>}
-          {success && <p className="form-success">{success}</p>}
+            {serverError && <p className="form-error">{serverError}</p>}
+            {success && <p className="form-success">{success}</p>}
 
-          <div className="input-group">
-            <label className="input-label" htmlFor="email">E-mail</label>
-            <div className="input-wrapper">
-              <FaEnvelope className="input-icon" />
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="Digite seu e-mail"
-                autoComplete="email"
-                className={`login-input ${errors.email ? "input-error" : ""}`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <div className="input-group">
+              <label className="input-label" htmlFor="email">
+                E-mail
+              </label>
+              <div className="input-wrapper">
+                <FaEnvelope className="input-icon" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="Digite seu e-mail"
+                  autoComplete="email"
+                  className={`login-input ${errors.email ? "input-error" : ""}`}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              {errors.email && (
+                <span className="input-hint error">{errors.email}</span>
+              )}
             </div>
-            {errors.email && (
-              <span className="input-hint error">{errors.email}</span>
-            )}
-          </div>
 
-          <div className="input-group">
-            <label className="input-label" htmlFor="password">Senha</label>
-            <div className="input-wrapper">
-              <FaLock className="input-icon" />
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                placeholder="Digite sua senha"
-                autoComplete="current-password"
-                className={`login-input ${errors.password ? "input-error" : ""}`}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+            <div className="input-group">
+              <label className="input-label" htmlFor="password">
+                Senha
+              </label>
+              <div className="input-wrapper">
+                <FaLock className="input-icon" />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  placeholder="Digite sua senha"
+                  autoComplete="current-password"
+                  className={`login-input ${
+                    errors.password ? "input-error" : ""
+                  }`}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              {errors.password && (
+                <span className="input-hint error">{errors.password}</span>
+              )}
             </div>
-            {errors.password && (
-              <span className="input-hint error">{errors.password}</span>
-            )}
-          </div>
 
-          <div className="login-buttons">
-            <button type="submit" className="login-button login-button-primary">
-              Entrar
-            </button>
-            <Link href="/" className="login-button login-button-secondary">
-              Voltar
-            </Link>
-          </div>
-        </form>
-      </section>
-    </main>
+            <div className="login-buttons">
+              <button
+                type="submit"
+                className="login-button login-button-primary"
+              >
+                Entrar
+              </button>
+              <Link href="/" className="login-button login-button-secondary">
+                Voltar
+              </Link>
+            </div>
+          </form>
+        </section>
+      </main>
     </>
   );
 };

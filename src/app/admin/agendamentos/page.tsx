@@ -11,7 +11,7 @@ interface Appointment {
   id: number;
   date: string;
   timeSlot: string;
-  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+  status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
   observations?: string;
   serviceType: string;
   vehicleCategory: string;
@@ -47,26 +47,31 @@ export default function AdminAgendamentos() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterDate, setFilterDate] = useState("all");
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showObsModal, setShowObsModal] = useState(false);
   const [observacoes, setObservacoes] = useState("");
-  const [toast, setToast] = useState<{show: boolean; message: string; type: 'success' | 'error'}>({
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
     show: false,
-    message: '',
-    type: 'success'
+    message: "",
+    type: "success",
   });
 
   // Verificação de permissão de admin
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'ADMIN')) {
-      router.push('/');
+    if (!authLoading && (!user || user.role !== "ADMIN")) {
+      router.push("/");
     }
   }, [user, authLoading, router]);
 
   // Buscar agendamentos do backend
   useEffect(() => {
-    if (user?.role === 'ADMIN') {
+    if (user?.role === "ADMIN") {
       fetchAppointments();
     }
   }, [user]);
@@ -74,20 +79,20 @@ export default function AdminAgendamentos() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/appointments/admin/all');
+      const response = await apiClient.get("/appointments/admin/all");
       setAppointments(response.data);
     } catch (error) {
-      console.error('Erro ao buscar agendamentos:', error);
-      showToast('Erro ao carregar agendamentos', 'error');
+      console.error("Erro ao buscar agendamentos:", error);
+      showToast("Erro ao carregar agendamentos", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (message: string, type: 'success' | 'error') => {
+  const showToast = (message: string, type: "success" | "error") => {
     setToast({ show: true, message, type });
     setTimeout(() => {
-      setToast({ show: false, message: '', type: 'success' });
+      setToast({ show: false, message: "", type: "success" });
     }, 3000);
   };
 
@@ -115,7 +120,7 @@ export default function AdminAgendamentos() {
   };
 
   const formatPrice = (priceCents: number | null | undefined) => {
-    if (typeof priceCents !== 'number' || isNaN(priceCents)) return '--';
+    if (typeof priceCents !== "number" || isNaN(priceCents)) return "--";
     return (priceCents / 100).toFixed(2);
   };
 
@@ -134,51 +139,60 @@ export default function AdminAgendamentos() {
     if (!selectedAppointment) return;
 
     try {
-      await apiClient.patch(`/appointments/${selectedAppointment.id}/observations`, {
-        observations: observacoes
-      });
-      showToast('Observação salva com sucesso!', 'success');
+      await apiClient.patch(
+        `/appointments/${selectedAppointment.id}/observations`,
+        {
+          observations: observacoes,
+        }
+      );
+      showToast("Observação salva com sucesso!", "success");
       setShowObsModal(false);
       fetchAppointments(); // Recarregar lista
     } catch (error) {
-      console.error('Erro ao salvar observação:', error);
-      showToast('Erro ao salvar observação', 'error');
+      console.error("Erro ao salvar observação:", error);
+      showToast("Erro ao salvar observação", "error");
     }
   };
 
   const handleCancelAppointment = async (id: number) => {
     try {
       await apiClient.patch(`/appointments/${id}/cancel`);
-      showToast('Agendamento cancelado com sucesso!', 'success');
+      showToast("🚫 Agendamento cancelado com sucesso!", "success");
       fetchAppointments(); // Recarregar lista
     } catch (error) {
-      console.error('Erro ao cancelar agendamento:', error);
-      showToast('Erro ao cancelar agendamento', 'error');
+      console.error("Erro ao cancelar agendamento:", error);
+      showToast(
+        "❌ Erro ao cancelar agendamento. Verifique permissões ou tente novamente.",
+        "error"
+      );
     }
   };
 
   const handleCompleteAppointment = async (id: number) => {
     try {
       await apiClient.patch(`/appointments/${id}/complete`);
-      showToast('Agendamento concluído com sucesso!', 'success');
+      showToast("✅ Agendamento concluído com sucesso!", "success");
       fetchAppointments(); // Recarregar lista
     } catch (error) {
-      console.error('Erro ao concluir agendamento:', error);
-      showToast('Erro ao concluir agendamento', 'error');
+      console.error("Erro ao concluir agendamento:", error);
+      showToast(
+        "❌ Erro ao concluir agendamento. Verifique permissões ou tente novamente.",
+        "error"
+      );
     }
   };
 
   const filteredAppointments = appointments.filter((apt) => {
     // Filtro de status
     if (filterStatus !== "all" && apt.status !== filterStatus) return false;
-    
+
     // Filtro de data
     if (filterDate !== "all") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const aptDate = new Date(apt.date);
       aptDate.setHours(0, 0, 0, 0);
-      
+
       if (filterDate === "today") {
         if (aptDate.getTime() !== today.getTime()) return false;
       } else if (filterDate === "tomorrow") {
@@ -191,11 +205,11 @@ export default function AdminAgendamentos() {
         if (aptDate < today || aptDate > weekFromNow) return false;
       }
     }
-    
+
     return true;
   });
 
-  if (authLoading || (user?.role === 'ADMIN' && loading)) {
+  if (authLoading || (user?.role === "ADMIN" && loading)) {
     return (
       <div className="admin-layout">
         <AdminSidebar />
@@ -208,7 +222,7 @@ export default function AdminAgendamentos() {
     );
   }
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== "ADMIN") {
     return null;
   }
 
@@ -273,7 +287,10 @@ export default function AdminAgendamentos() {
               <tbody>
                 {filteredAppointments.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                    <td
+                      colSpan={7}
+                      style={{ textAlign: "center", padding: "2rem" }}
+                    >
                       Nenhum agendamento encontrado
                     </td>
                   </tr>
@@ -282,18 +299,31 @@ export default function AdminAgendamentos() {
                     <tr key={appointment.id}>
                       <td>
                         <div>
-                          <div className="client-name">{appointment.user.name}</div>
-                          <div className="client-phone">{appointment.user.phone || appointment.user.email}</div>
+                          <div className="client-name">
+                            {appointment.user.name}
+                          </div>
+                          <div className="client-phone">
+                            {appointment.user.phone || appointment.user.email}
+                          </div>
                         </div>
                       </td>
                       <td>{appointment.serviceType}</td>
                       <td>
                         {formatDate(appointment.date)} às {appointment.timeSlot}
                       </td>
-                      <td>{appointment.car.brand} {appointment.car.model} - {appointment.car.licensePlate}</td>
-                      <td className="price-cell">R$ {formatPrice(appointment.priceCents)}</td>
                       <td>
-                        <span className={`badge ${getStatusClass(appointment.status)}`}>
+                        {appointment.car.brand} {appointment.car.model} -{" "}
+                        {appointment.car.licensePlate}
+                      </td>
+                      <td className="price-cell">
+                        R$ {formatPrice(appointment.priceCents)}
+                      </td>
+                      <td>
+                        <span
+                          className={`badge ${getStatusClass(
+                            appointment.status
+                          )}`}
+                        >
                           {getStatusLabel(appointment.status)}
                         </span>
                       </td>
@@ -317,14 +347,18 @@ export default function AdminAgendamentos() {
                             <>
                               <button
                                 className="btn-action btn-complete"
-                                onClick={() => handleCompleteAppointment(appointment.id)}
+                                onClick={() =>
+                                  handleCompleteAppointment(appointment.id)
+                                }
                                 title="Marcar como concluído"
                               >
                                 ✅
                               </button>
                               <button
                                 className="btn-action btn-cancel"
-                                onClick={() => handleCancelAppointment(appointment.id)}
+                                onClick={() =>
+                                  handleCancelAppointment(appointment.id)
+                                }
                                 title="Cancelar"
                               >
                                 ❌
@@ -344,77 +378,124 @@ export default function AdminAgendamentos() {
         {/* Modal de Detalhes */}
         {showModal && selectedAppointment && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="modal-content modal-large"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="modal-title">Detalhes do Agendamento</h3>
-              
+
               <div className="details-grid">
                 <div className="detail-item">
                   <span className="detail-label">Cliente:</span>
-                  <span className="detail-value">{selectedAppointment.user.name}</span>
+                  <span className="detail-value">
+                    {selectedAppointment.user.name}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Email:</span>
-                  <span className="detail-value">{selectedAppointment.user.email}</span>
+                  <span className="detail-value">
+                    {selectedAppointment.user.email}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Telefone:</span>
-                  <span className="detail-value">{selectedAppointment.user.phone || 'Não informado'}</span>
+                  <span className="detail-value">
+                    {selectedAppointment.user.phone || "Não informado"}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Serviço:</span>
-                  <span className="detail-value">{selectedAppointment.serviceType}</span>
+                  <span className="detail-value">
+                    {selectedAppointment.serviceType}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Categoria do Veículo:</span>
-                  <span className="detail-value">{selectedAppointment.car?.category || '--'}</span>
+                  <span className="detail-value">
+                    {selectedAppointment.car?.category || "--"}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Data/Hora:</span>
                   <span className="detail-value">
-                    {formatDate(selectedAppointment.date)}{selectedAppointment.time ? ` às ${selectedAppointment.time}` : ''}
+                    {formatDate(selectedAppointment.date)}
+                    {selectedAppointment.time
+                      ? ` às ${selectedAppointment.time}`
+                      : ""}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Veículo:</span>
                   <span className="detail-value">
-                    {selectedAppointment.car?.name || ''} {selectedAppointment.car?.brand || ''} {selectedAppointment.car?.model || ''}
+                    {selectedAppointment.car?.name || ""}{" "}
+                    {selectedAppointment.car?.brand || ""}{" "}
+                    {selectedAppointment.car?.model || ""}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Placa:</span>
-                  <span className="detail-value">{selectedAppointment.car?.plate || '--'}</span>
+                  <span className="detail-value">
+                    {selectedAppointment.car?.plate || "--"}
+                  </span>
                 </div>
                 <div className="detail-item full-width">
                   <span className="detail-label">Endereço:</span>
                   <span className="detail-value">
-                    {selectedAppointment.address?.street}, {selectedAppointment.address?.number}
-                    {selectedAppointment.address?.complement && ` - ${selectedAppointment.address.complement}`}
+                    {selectedAppointment.address?.street},{" "}
+                    {selectedAppointment.address?.number}
+                    {selectedAppointment.address?.complement &&
+                      ` - ${selectedAppointment.address.complement}`}
                     <br />
-                    {selectedAppointment.address?.neighborhood} - {selectedAppointment.address?.city}/{selectedAppointment.address?.state}
+                    {selectedAppointment.address?.neighborhood} -{" "}
+                    {selectedAppointment.address?.city}/
+                    {selectedAppointment.address?.state}
                     <br />
-                    CEP: {selectedAppointment.address?.cep || '--'}
+                    CEP: {selectedAppointment.address?.cep || "--"}
                   </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Valor:</span>
-                  <span className="detail-value">R$ {formatPrice(selectedAppointment.priceCents)}</span>
+                  <span className="detail-value">
+                    R$ {formatPrice(selectedAppointment.priceCents)}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Status:</span>
-                  <span className={`badge ${getStatusClass(selectedAppointment.status)}`}>
+                  <span
+                    className={`badge ${getStatusClass(
+                      selectedAppointment.status
+                    )}`}
+                  >
                     {getStatusLabel(selectedAppointment.status)}
                   </span>
                 </div>
                 {selectedAppointment.observations && (
                   <div className="detail-item full-width">
                     <span className="detail-label">Observações:</span>
-                    <span className="detail-value">{selectedAppointment.observations}</span>
+                    <span className="detail-value">
+                      {selectedAppointment.observations}
+                    </span>
                   </div>
                 )}
               </div>
 
-              <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24 }}>
-                <button className="btn-secondary" style={{ minWidth: 100, padding: '8px 20px', borderRadius: 6 }} onClick={() => setShowModal(false)}>
+              <div
+                className="modal-actions"
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginTop: 24,
+                }}
+              >
+                <button
+                  className="btn-secondary"
+                  style={{
+                    minWidth: 100,
+                    padding: "8px 20px",
+                    borderRadius: 6,
+                  }}
+                  onClick={() => setShowModal(false)}
+                >
                   Fechar
                 </button>
               </div>
@@ -427,7 +508,7 @@ export default function AdminAgendamentos() {
           <div className="modal-overlay" onClick={() => setShowObsModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h3 className="modal-title">Adicionar Observação</h3>
-              
+
               <div className="form-group">
                 <label>Observações sobre o cliente ou agendamento:</label>
                 <textarea
@@ -440,7 +521,10 @@ export default function AdminAgendamentos() {
               </div>
 
               <div className="modal-actions">
-                <button className="btn-secondary" onClick={() => setShowObsModal(false)}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowObsModal(false)}
+                >
                   Cancelar
                 </button>
                 <button className="btn-primary" onClick={handleSaveObservation}>
@@ -453,7 +537,43 @@ export default function AdminAgendamentos() {
 
         {/* Toast Notification */}
         {toast.show && (
-          <div className={`toast toast-${toast.type}`}>
+          <div
+            className={`toast toast-${toast.type}`}
+            style={{
+              position: "fixed",
+              top: "32px",
+              right: "32px",
+              zIndex: 9999,
+              minWidth: "260px",
+              padding: "16px 24px",
+              borderRadius: "10px",
+              fontWeight: 500,
+              fontSize: "1rem",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+              color:
+                toast.type === "success" && toast.message.includes("cancelado")
+                  ? "#b45309"
+                  : toast.type === "success"
+                  ? "#065f46"
+                  : "#991b1b",
+              background:
+                toast.type === "success" && toast.message.includes("cancelado")
+                  ? "#fef3c7"
+                  : toast.type === "success"
+                  ? "#d1fae5"
+                  : "#fee2e2",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              transition: "all 0.3s",
+              animation: "fadeIn 0.5s",
+            }}
+          >
+            {toast.type === "success" && toast.message.includes("cancelado")
+              ? "🚫"
+              : toast.type === "success"
+              ? "✅"
+              : "❌"}
             {toast.message}
           </div>
         )}
