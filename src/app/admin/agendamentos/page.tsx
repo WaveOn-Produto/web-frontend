@@ -61,6 +61,8 @@ export default function AdminAgendamentos() {
     message: "",
     type: "success",
   });
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Verificação de permissão de admin
   useEffect(() => {
@@ -75,6 +77,25 @@ export default function AdminAgendamentos() {
       fetchAppointments();
     }
   }, [user]);
+
+  useEffect(() => {
+    // Carregar horários disponíveis do backend
+    const fetchAvailableTimeSlots = async () => {
+      try {
+        const response = await apiClient.get(
+          `/api/appointments/available-slots?date=${selectedDate}`
+        );
+        setAvailableTimeSlots(response.data.availableSlots);
+      } catch (error) {
+        console.error("Erro ao carregar horários disponíveis:", error);
+        showToast("Erro ao carregar horários disponíveis", "error");
+      }
+    };
+
+    if (selectedDate) {
+      fetchAvailableTimeSlots();
+    }
+  }, [selectedDate]);
 
   const fetchAppointments = async () => {
     try {
@@ -179,6 +200,20 @@ export default function AdminAgendamentos() {
         "❌ Erro ao concluir agendamento. Verifique permissões ou tente novamente.",
         "error"
       );
+    }
+  };
+
+  const handleMarkAppointment = async (selectedTimeSlot: string) => {
+    try {
+      await apiClient.post("/appointments", { timeSlot: selectedTimeSlot });
+      setAvailableTimeSlots((prev) =>
+        prev.filter((timeSlot) => timeSlot !== selectedTimeSlot)
+      );
+      showToast("✅ Horário marcado com sucesso!", "success");
+      fetchAppointments(); // Atualizar lista de agendamentos
+    } catch (error) {
+      console.error("Erro ao marcar horário:", error);
+      showToast("❌ Erro ao marcar horário. Tente novamente.", "error");
     }
   };
 

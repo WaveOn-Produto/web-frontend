@@ -201,9 +201,9 @@ const RegisterPage: React.FC = () => {
       }
 
       // Redireciona para login após 2 segundos
-      // setTimeout(() => {
-      //   window.location.href = "/login";
-      // }, 2000);
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
       console.error("Detalhes do erro:", error.response?.data);
