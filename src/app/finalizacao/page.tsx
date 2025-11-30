@@ -13,27 +13,30 @@ const FinalizacaoPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logout, loading } = useAuth();
-  
+
   const servico = searchParams.get("servico") || "";
   const data = searchParams.get("data") || "";
   const horario = searchParams.get("horario") || "";
   const categoria = searchParams.get("categoria") || "";
   const preco = searchParams.get("preco") || "";
-  
+
   const [showPaymentCards, setShowPaymentCards] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
   const [userCars, setUserCars] = useState<any[]>([]);
   const [userAddresses, setUserAddresses] = useState<any[]>([]);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "warning";
+  } | null>(null);
   const [torneira, setTorneira] = useState(false);
   const [tomada, setTomada] = useState(false);
 
   // Redireciona para login se não estiver autenticado
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, loading, router]);
 
@@ -43,7 +46,7 @@ const FinalizacaoPage: React.FC = () => {
         try {
           const [carsResponse, addressesResponse] = await Promise.all([
             apiClient.get("/cars/my"),
-            apiClient.get("/addresses/my")
+            apiClient.get("/addresses/my"),
           ]);
           setUserCars(carsResponse.data);
           setUserAddresses(addressesResponse.data);
@@ -51,9 +54,9 @@ const FinalizacaoPage: React.FC = () => {
           console.error("Erro ao carregar dados:", error);
           // Só mostra erro se não for 401
           if (error.response?.status !== 401) {
-            setToast({ 
-              message: "Erro ao carregar dados. Tente novamente.", 
-              type: "error" 
+            setToast({
+              message: "Erro ao carregar dados. Tente novamente.",
+              type: "error",
             });
           }
         }
@@ -65,7 +68,10 @@ const FinalizacaoPage: React.FC = () => {
 
   const handleContinueInfo = () => {
     if (!selectedAddress || !selectedVehicle) {
-      setToast({ message: "Por favor, selecione endereço e veículo", type: "warning" });
+      setToast({
+        message: "Por favor, selecione endereço e veículo",
+        type: "warning",
+      });
       return;
     }
     setShowPaymentCards(true);
@@ -73,12 +79,18 @@ const FinalizacaoPage: React.FC = () => {
 
   const handleFinalizar = async () => {
     if (!selectedPayment) {
-      setToast({ message: "Por favor, selecione um método de pagamento", type: "warning" });
+      setToast({
+        message: "Por favor, selecione um método de pagamento",
+        type: "warning",
+      });
       return;
     }
 
     if (!torneira || !tomada) {
-      setToast({ message: "Por favor, confirme os itens necessários", type: "warning" });
+      setToast({
+        message: "Por favor, confirme os itens necessários",
+        type: "warning",
+      });
       return;
     }
 
@@ -95,16 +107,21 @@ const FinalizacaoPage: React.FC = () => {
       console.log("Enviando dados do agendamento:", appointmentData);
 
       await apiClient.post("/appointments", appointmentData);
-      
-      setToast({ message: "Agendamento realizado com sucesso!", type: "success" });
-      
+
+      setToast({
+        message: "Agendamento realizado com sucesso!",
+        type: "success",
+      });
+
       setTimeout(() => {
         router.push("/");
       }, 2000);
     } catch (error: any) {
       console.error("Erro ao criar agendamento:", error);
       console.error("Resposta do erro:", error.response?.data);
-      const errorMessage = error.response?.data?.message || "Erro ao criar agendamento. Tente novamente.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Erro ao criar agendamento. Tente novamente.";
       setToast({ message: errorMessage, type: "error" });
     }
   };
@@ -123,22 +140,42 @@ const FinalizacaoPage: React.FC = () => {
         <div className="header-actions">
           <button className="icon-button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="7" r="4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="12"
+                cy="7"
+                r="4"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
-          <button className="sair-button" onClick={logout}>Sair</button>
+          <button className="sair-button" onClick={logout}>
+            Sair
+          </button>
         </div>
       </header>
 
-      <div className={`finalizacao-container ${showPaymentCards ? 'multiple-cards' : 'single-card'}`}>
+      <div
+        className={`finalizacao-container ${
+          showPaymentCards ? "multiple-cards" : "single-card"
+        }`}
+      >
         {/* Card 1: Verificar Informações */}
-        <div className={`card ${showPaymentCards ? 'first-card' : ''}`}>
+        <div className={`card ${showPaymentCards ? "first-card" : ""}`}>
           <h2 className="card-title">Verificar Informações</h2>
-          
+
           <div className="info-section">
             <label className="info-label">Endereços</label>
-            <select 
+            <select
               className="info-select"
               value={selectedAddress}
               onChange={(e) => setSelectedAddress(e.target.value)}
@@ -151,7 +188,7 @@ const FinalizacaoPage: React.FC = () => {
               ))}
             </select>
             {userAddresses.length === 0 && (
-              <AlertInfo 
+              <AlertInfo
                 message="Nenhum endereço cadastrado."
                 linkText="Cadastre aqui"
                 linkHref="/perfil"
@@ -163,7 +200,7 @@ const FinalizacaoPage: React.FC = () => {
 
           <div className="info-section">
             <label className="info-label">Veículo</label>
-            <select 
+            <select
               className="info-select"
               value={selectedVehicle}
               onChange={(e) => setSelectedVehicle(e.target.value)}
@@ -171,12 +208,19 @@ const FinalizacaoPage: React.FC = () => {
               <option value="">Selecionar</option>
               {userCars.map((car) => (
                 <option key={car.id} value={car.id}>
-                  {car.brand} {car.model} - {car.licensePlate}
+                  {(car.marca || car.brand || "") +
+                    " " +
+                    (car.modelo || car.model || "") +
+                    (car.placa
+                      ? " - " + car.placa
+                      : car.licensePlate
+                      ? " - " + car.licensePlate
+                      : "")}
                 </option>
               ))}
             </select>
             {userCars.length === 0 && (
-              <AlertInfo 
+              <AlertInfo
                 message="Nenhum veículo cadastrado."
                 linkText="Cadastre aqui"
                 linkHref="/perfil"
@@ -189,17 +233,17 @@ const FinalizacaoPage: React.FC = () => {
           <div className="info-row">
             <div className="info-section">
               <label className="info-label">Data</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="info-input"
-                value={data ? data.split('-').reverse().join('/') : ''}
+                value={data ? data.split("-").reverse().join("/") : ""}
                 readOnly
               />
             </div>
             <div className="info-section">
               <label className="info-label">Hora</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="info-input"
                 value={horario}
                 readOnly
@@ -209,17 +253,17 @@ const FinalizacaoPage: React.FC = () => {
 
           <div className="info-section">
             <label className="info-label">Nome</label>
-            <p className="info-text">{user?.name || 'Não informado'}</p>
+            <p className="info-text">{user?.name || "Não informado"}</p>
           </div>
 
           <div className="info-section">
             <label className="info-label">Email</label>
-            <p className="info-text">{user?.email || 'Não informado'}</p>
+            <p className="info-text">{user?.email || "Não informado"}</p>
           </div>
 
           <div className="info-section">
             <label className="info-label">Celular</label>
-            <p className="info-text">{user?.phone || 'Não informado'}</p>
+            <p className="info-text">{user?.phone || "Não informado"}</p>
           </div>
 
           <button className="continuar-button" onClick={handleContinueInfo}>
@@ -231,33 +275,60 @@ const FinalizacaoPage: React.FC = () => {
         {showPaymentCards && (
           <div className="card new-card">
             <h2 className="card-title">Selecionar método de pagamento</h2>
-            
-            <div 
-              className={`payment-option ${selectedPayment === 'pix' ? 'selected' : ''}`}
-              onClick={() => setSelectedPayment('pix')}
+
+            <div
+              className={`payment-option ${
+                selectedPayment === "pix" ? "selected" : ""
+              }`}
+              onClick={() => setSelectedPayment("pix")}
             >
               <div className="payment-icon pix-icon">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#32BCAD"/>
-                  <path d="M28 16l-4 4 4 4M12 16l4 4-4 4M16 12l8 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect width="40" height="40" rx="8" fill="#32BCAD" />
+                  <path
+                    d="M28 16l-4 4 4 4M12 16l4 4-4 4M16 12l8 16"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
               <div className="payment-info">
                 <h3 className="payment-title">PIX</h3>
                 <p className="payment-subtitle">Pague com Pix</p>
-                <p className="payment-description">Pagamento Rápido por QRCODE</p>
+                <p className="payment-description">
+                  Pagamento Rápido por QRCODE
+                </p>
               </div>
             </div>
 
-            <div 
-              className={`payment-option ${selectedPayment === 'cartao' ? 'selected' : ''}`}
-              onClick={() => setSelectedPayment('cartao')}
+            <div
+              className={`payment-option ${
+                selectedPayment === "cartao" ? "selected" : ""
+              }`}
+              onClick={() => setSelectedPayment("cartao")}
             >
               <div className="payment-icon card-icon">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                  <rect width="40" height="40" rx="8" fill="#555555"/>
-                  <rect x="8" y="12" width="24" height="16" rx="2" stroke="white" strokeWidth="2"/>
-                  <line x1="8" y1="16" x2="32" y2="16" stroke="white" strokeWidth="2"/>
+                  <rect width="40" height="40" rx="8" fill="#555555" />
+                  <rect
+                    x="8"
+                    y="12"
+                    width="24"
+                    height="16"
+                    rx="2"
+                    stroke="white"
+                    strokeWidth="2"
+                  />
+                  <line
+                    x1="8"
+                    y1="16"
+                    x2="32"
+                    y2="16"
+                    stroke="white"
+                    strokeWidth="2"
+                  />
                 </svg>
               </div>
               <div className="payment-info">
@@ -267,9 +338,7 @@ const FinalizacaoPage: React.FC = () => {
               </div>
             </div>
 
-            <button className="continuar-button">
-              Continuar
-            </button>
+            <button className="continuar-button">Continuar</button>
           </div>
         )}
 
@@ -277,7 +346,7 @@ const FinalizacaoPage: React.FC = () => {
         {showPaymentCards && (
           <div className="card new-card">
             <h2 className="card-title">Finalizar Agendamento</h2>
-            
+
             <div className="summary-section">
               <p className="summary-label">{servico}</p>
               <p className="summary-quantity">1x</p>
@@ -289,20 +358,22 @@ const FinalizacaoPage: React.FC = () => {
             </div>
 
             <div className="checklist-section">
-              <p className="checklist-text">Para melhor atendê-los, pedimos que confirme os seguintes itens:</p>
+              <p className="checklist-text">
+                Para melhor atendê-los, pedimos que confirme os seguintes itens:
+              </p>
               <div className="checklist-item">
-                <input 
-                  type="checkbox" 
-                  id="torneira" 
+                <input
+                  type="checkbox"
+                  id="torneira"
                   checked={torneira}
                   onChange={(e) => setTorneira(e.target.checked)}
                 />
                 <label htmlFor="torneira">Torneira de fácil acesso</label>
               </div>
               <div className="checklist-item">
-                <input 
-                  type="checkbox" 
-                  id="tomada" 
+                <input
+                  type="checkbox"
+                  id="tomada"
                   checked={tomada}
                   onChange={(e) => setTomada(e.target.checked)}
                 />
