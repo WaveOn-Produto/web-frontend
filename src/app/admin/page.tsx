@@ -137,7 +137,10 @@ export default function AdminDashboard() {
                     <tr key={appointment.id}>
                       <td>{appointment.user?.name || "-"}</td>
                       <td>
-                        {appointment.serviceName || appointment.service || "-"}
+                        {appointment.serviceType ||
+                          appointment.serviceName ||
+                          appointment.service ||
+                          "-"}
                       </td>
                       <td>
                         {appointment.time ||

@@ -309,11 +309,19 @@ export default function AdminAgendamentos() {
                       </td>
                       <td>{appointment.serviceType}</td>
                       <td>
-                        {formatDate(appointment.date)} às {appointment.timeSlot}
+                        {formatDate(appointment.date)}
+                        {appointment.timeSlot
+                          ? ` às ${appointment.timeSlot}`
+                          : appointment.time
+                          ? ` às ${appointment.time}`
+                          : ""}
                       </td>
                       <td>
-                        {appointment.car.brand} {appointment.car.model} -{" "}
-                        {appointment.car.licensePlate}
+                        {appointment.car
+                          ? `${appointment.car.brand || ""} ${
+                              appointment.car.model || ""
+                            }`.trim() || "-"
+                          : "-"}
                       </td>
                       <td className="price-cell">
                         R$ {formatPrice(appointment.priceCents)}
@@ -427,7 +435,6 @@ export default function AdminAgendamentos() {
                 <div className="detail-item">
                   <span className="detail-label">Veículo:</span>
                   <span className="detail-value">
-                    {selectedAppointment.car?.name || ""}{" "}
                     {selectedAppointment.car?.brand || ""}{" "}
                     {selectedAppointment.car?.model || ""}
                   </span>

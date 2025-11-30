@@ -8,7 +8,14 @@ import AddressModal, { AddressData } from "@/components/AddressModal";
 import "@/styles/app-css/cadastro.css";
 import apiClient from "@/services/api";
 import { User } from "@/types/auth";
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaMapMarkerAlt, FaQuestionCircle } from "react-icons/fa";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaQuestionCircle,
+} from "react-icons/fa";
 
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState({
@@ -38,7 +45,14 @@ const RegisterPage: React.FC = () => {
   const [serverError, setServerError] = useState("");
 
   function validate() {
-    const newErrors = { name: "", email: "", password: "", cellphone: "", carro: "", endereco: "" };
+    const newErrors = {
+      name: "",
+      email: "",
+      password: "",
+      cellphone: "",
+      carro: "",
+      endereco: "",
+    };
     let valid = true;
 
     if (!form.name) {
@@ -61,7 +75,8 @@ const RegisterPage: React.FC = () => {
       newErrors.password = "Informe a senha.";
       valid = false;
     } else if (form.password.length < 8) {
-      newErrors.password = "A senha deve ter pelo menos 8 caracteres com maiúsculas, minúsculas e números.";
+      newErrors.password =
+        "A senha deve ter pelo menos 8 caracteres com maiúsculas, minúsculas e números.";
       valid = false;
     }
 
@@ -71,7 +86,9 @@ const RegisterPage: React.FC = () => {
     return valid;
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
   }
@@ -90,7 +107,7 @@ const RegisterPage: React.FC = () => {
     e.preventDefault();
     console.log("Formulário submetido!");
     console.log("Dados do formulário:", form);
-    
+
     setSuccess("");
     setServerError("");
 
@@ -108,23 +125,90 @@ const RegisterPage: React.FC = () => {
         password: form.password,
         phone: form.cellphone || undefined,
       };
-      
+
       console.log("Payload:", payload);
-      
+
       const response = await apiClient.post<User>("/users/register", payload);
 
       console.log("Resposta do backend:", response.data);
-      
+
       setSuccess("Conta criada com sucesso! Redirecionando para login...");
 
+      // Autenticar o usuário após o cadastro
+      try {
+        const loginPayload = {
+          email: form.email,
+          password: form.password,
+        };
+        const loginResponse = await apiClient.post("/auth/login", loginPayload);
+        const token = loginResponse.data.access_token;
+        localStorage.setItem("authToken", token); // Armazena o token
+
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+
+        // Validação do token
+        if (!token) {
+          console.error("Token de autenticação não encontrado.");
+          setServerError("Erro de autenticação. Por favor, tente novamente.");
+          return;
+        }
+
+        // Ajustar payload para carros e endereços
+        for (const car of carsList) {
+          try {
+            const carPayload = {
+              name: car.name,
+              plate: car.plate,
+              brand: car.brand,
+              model: car.model,
+              category: car.category,
+            };
+            await apiClient.post("/cars", carPayload, config);
+          } catch (error: any) {
+            console.error("Erro ao salvar carro:", error);
+            setServerError("Erro ao salvar carro. Por favor, tente novamente.");
+          }
+        }
+
+        for (const address of addressList) {
+          try {
+            const addressPayload = {
+              cep: address.cep,
+              street: address.rua,
+              number: address.numero,
+              complement: address.complemento,
+              district: address.bairro,
+              city: address.cidade,
+            };
+            await apiClient.post("/addresses", addressPayload, config);
+          } catch (error: any) {
+            console.error("Erro ao salvar endereço:", error);
+            setServerError(
+              "Erro ao salvar endereço. Por favor, tente novamente."
+            );
+          }
+        }
+        console.log("Carros e endereços enviados com sucesso!");
+      } catch (error) {
+        console.error(
+          "Erro ao autenticar ou enviar carros e endereços:",
+          error
+        );
+        setServerError(
+          "Erro ao salvar carros ou endereços. Tente novamente mais tarde."
+        );
+        return;
+      }
+
       // Redireciona para login após 2 segundos
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
+      // setTimeout(() => {
+      //   window.location.href = "/login";
+      // }, 2000);
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
       console.error("Detalhes do erro:", error.response?.data);
-      const errorMessage = error.response?.data?.message || "Erro ao criar conta.";
+      const errorMessage =
+        error.response?.data?.message || "Erro ao criar conta.";
       if (Array.isArray(errorMessage)) {
         setServerError(errorMessage.join(", "));
       } else {
@@ -136,154 +220,209 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <LoginHeader />
-      
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 'calc(100vh - 80px)',
-        paddingTop: '9rem',
-        paddingBottom: '2rem',
-        paddingLeft: '1rem',
-        paddingRight: '1rem'
-      }}>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "calc(100vh - 80px)",
+          paddingTop: "9rem",
+          paddingBottom: "2rem",
+          paddingLeft: "1rem",
+          paddingRight: "1rem",
+        }}
+      >
         <div className="cadastro-form">
-            <h1 className="cadastro-title">Criar conta</h1>
-            
-            {serverError && <p className="form-error">{serverError}</p>}
-            {success && <p className="form-success">{success}</p>}
-            
-            <form className="space-y-3" onSubmit={handleSubmit}>
-              {/* Nome */}
-              <div className="input-group">
-                <label className="input-label" htmlFor="name">Nome</label>
-                <div className="input-wrapper">
-                  <FaUser className="input-icon" />
-                  <input
-                    id="name"
-                    type="text"
-                    placeholder="Digite seu nome completo"
-                    className={`cadastro-input ${errors.name ? "input-error" : ""}`}
-                    value={form.name}
+          <h1 className="cadastro-title">Criar conta</h1>
+
+          {serverError && <p className="form-error">{serverError}</p>}
+          {success && <p className="form-success">{success}</p>}
+
+          <form className="space-y-3" onSubmit={handleSubmit}>
+            {/* Nome */}
+            <div className="input-group">
+              <label className="input-label" htmlFor="name">
+                Nome
+              </label>
+              <div className="input-wrapper">
+                <FaUser className="input-icon" />
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Digite seu nome completo"
+                  className={`cadastro-input ${
+                    errors.name ? "input-error" : ""
+                  }`}
+                  value={form.name}
+                  onChange={handleChange}
+                />
+              </div>
+              {errors.name && (
+                <span className="input-hint error">{errors.name}</span>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="input-group">
+              <label className="input-label" htmlFor="email">
+                Email
+              </label>
+              <div className="input-wrapper">
+                <FaEnvelope className="input-icon" />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Digite seu e-mail"
+                  className={`cadastro-input ${
+                    errors.email ? "input-error" : ""
+                  }`}
+                  value={form.email}
+                  onChange={handleChange}
+                />
+              </div>
+              {errors.email && (
+                <span className="input-hint error">{errors.email}</span>
+              )}
+            </div>
+
+            {/* Senha */}
+            <div className="input-group">
+              <label className="input-label" htmlFor="password">
+                Senha
+              </label>
+              <div className="input-wrapper">
+                <FaLock className="input-icon" />
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Digite sua senha"
+                  className={`cadastro-input ${
+                    errors.password ? "input-error" : ""
+                  }`}
+                  value={form.password}
+                  onChange={handleChange}
+                />
+              </div>
+              {errors.password && (
+                <span className="input-hint error">{errors.password}</span>
+              )}
+            </div>
+
+            {/* Celular */}
+            <div className="input-group">
+              <label className="input-label" htmlFor="cellphone">
+                Celular
+              </label>
+              <div className="input-wrapper">
+                <FaPhone className="input-icon" />
+                <input
+                  id="cellphone"
+                  type="tel"
+                  placeholder="Digite seu celular"
+                  className={`cadastro-input ${
+                    errors.cellphone ? "input-error" : ""
+                  }`}
+                  value={form.cellphone}
+                  onChange={handleChange}
+                />
+              </div>
+              {errors.cellphone && (
+                <span className="input-hint error">{errors.cellphone}</span>
+              )}
+            </div>
+
+            {/* Carros e Endereços lado a lado */}
+            <div className="side-by-side-fields">
+              {/* Carros */}
+              <div className="input-group half-width">
+                <label className="input-label" htmlFor="carro">
+                  Carros
+                </label>
+                <div className="select-wrapper">
+                  <select
+                    id="carro"
+                    value={form.carro}
                     onChange={handleChange}
-                  />
+                    className={`cadastro-select ${
+                      errors.carro ? "input-error" : ""
+                    }`}
+                  >
+                    <option value="">Selecionar</option>
+                    {carsList.map((car, index) => (
+                      <option key={index} value={`${car.brand}-${car.model}`}>
+                        {car.name} - {car.plate}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                {errors.name && <span className="input-hint error">{errors.name}</span>}
-              </div>
-
-              {/* Email */}
-              <div className="input-group">
-                <label className="input-label" htmlFor="email">Email</label>
-                <div className="input-wrapper">
-                  <FaEnvelope className="input-icon" />
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="Digite seu e-mail"
-                    className={`cadastro-input ${errors.email ? "input-error" : ""}`}
-                    value={form.email}
-                    onChange={handleChange}
-                  />
-                </div>
-                {errors.email && <span className="input-hint error">{errors.email}</span>}
-              </div>
-
-              {/* Senha */}
-              <div className="input-group">
-                <label className="input-label" htmlFor="password">Senha</label>
-                <div className="input-wrapper">
-                  <FaLock className="input-icon" />
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="Digite sua senha"
-                    className={`cadastro-input ${errors.password ? "input-error" : ""}`}
-                    value={form.password}
-                    onChange={handleChange}
-                  />
-                </div>
-                {errors.password && <span className="input-hint error">{errors.password}</span>}
-              </div>
-
-              {/* Celular */}
-              <div className="input-group">
-                <label className="input-label" htmlFor="cellphone">Celular</label>
-                <div className="input-wrapper">
-                  <FaPhone className="input-icon" />
-                  <input
-                    id="cellphone"
-                    type="tel"
-                    placeholder="Digite seu celular"
-                    className={`cadastro-input ${errors.cellphone ? "input-error" : ""}`}
-                    value={form.cellphone}
-                    onChange={handleChange}
-                  />
-                </div>
-                {errors.cellphone && <span className="input-hint error">{errors.cellphone}</span>}
-              </div>
-
-              {/* Carros e Endereços lado a lado */}
-              <div className="side-by-side-fields">
-                {/* Carros */}
-                <div className="input-group half-width">
-                  <label className="input-label" htmlFor="carro">Carros</label>
-                  <div className="select-wrapper">
-                    <select
-                      id="carro"
-                      value={form.carro}
-                      onChange={handleChange}
-                      className={`cadastro-select ${errors.carro ? "input-error" : ""}`}
-                    >
-                      <option value="">Selecionar</option>
-                      {carsList.map((car, index) => (
-                        <option key={index} value={`${car.brand}-${car.model}`}>
-                          {car.name} - {car.plate}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <button type="button" className="add-button" onClick={() => setIsCarModalOpen(true)}>
-                    <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
-                  </button>
-                  {errors.carro && <span className="input-hint error">{errors.carro}</span>}
-                </div>
-
-                {/* Endereços */}
-                <div className="input-group half-width">
-                  <label className="input-label" htmlFor="endereco">Endereços</label>
-                  <div className="select-wrapper">
-                    <select
-                      id="endereco"
-                      value={form.endereco}
-                      onChange={handleChange}
-                      className={`cadastro-select ${errors.endereco ? "input-error" : ""}`}
-                    >
-                      <option value="">Selecionar</option>
-                      {addressList.map((address, index) => (
-                        <option key={index} value={`${address.endereco}-${address.numero}`}>
-                          {address.endereco}, {address.numero} - {address.bairro}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <button type="button" className="add-button" onClick={() => setIsAddressModalOpen(true)}>
-                    <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
-                  </button>
-                  {errors.endereco && <span className="input-hint error">{errors.endereco}</span>}
-                </div>
-              </div>
-
-              {/* Botões */}
-              <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '24px'}}>
-                <button type="submit" className="cadastro-btn-primary">
-                  Cadastrar
+                <button
+                  type="button"
+                  className="add-button"
+                  onClick={() => setIsCarModalOpen(true)}
+                >
+                  <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
                 </button>
-                <Link href="/" className="cadastro-btn-secondary">
-                  Voltar
-                </Link>
+                {errors.carro && (
+                  <span className="input-hint error">{errors.carro}</span>
+                )}
               </div>
-            </form>
-          </div>
+
+              {/* Endereços */}
+              <div className="input-group half-width">
+                <label className="input-label" htmlFor="endereco">
+                  Endereços
+                </label>
+                <div className="select-wrapper">
+                  <select
+                    id="endereco"
+                    value={form.endereco}
+                    onChange={handleChange}
+                    className={`cadastro-select ${
+                      errors.endereco ? "input-error" : ""
+                    }`}
+                  >
+                    <option value="">Selecionar</option>
+                    {addressList.map((address, index) => (
+                      <option
+                        key={index}
+                        value={`${address.endereco}-${address.numero}`}
+                      >
+                        {address.endereco}, {address.numero} - {address.bairro}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="add-button"
+                  onClick={() => setIsAddressModalOpen(true)}
+                >
+                  <img src="/images/icons/VectorAdd.svg" alt="Adicionar" />
+                </button>
+                {errors.endereco && (
+                  <span className="input-hint error">{errors.endereco}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Botões */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "24px",
+              }}
+            >
+              <button type="submit" className="cadastro-btn-primary">
+                Cadastrar
+              </button>
+              <Link href="/" className="cadastro-btn-secondary">
+                Voltar
+              </Link>
+            </div>
+          </form>
+        </div>
       </div>
 
       {/* Modal de Carros */}

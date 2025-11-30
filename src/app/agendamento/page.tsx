@@ -549,11 +549,12 @@ export default function AgendamentoPage() {
               <button
                 type="submit"
                 className="agendar-button"
-                disabled={!!categoryError && !categoryError.includes('logado')}
+                disabled={!!categoryError && !categoryError.includes("logado")}
                 onClick={(e) => {
-                  if (!user && categoryError.includes('logado')) {
+                  if (!user && categoryError.includes("logado")) {
                     e.preventDefault();
-                    redirectPathRef.current = window.location.pathname + window.location.search;
+                    redirectPathRef.current =
+                      window.location.pathname + window.location.search;
                     setShowLoginModal(true);
                   }
                 }}
