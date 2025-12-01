@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/services/api";
+import Toast from "@/components/Toast";
 import "@/styles/app-css/agendamentos.css";
 
 interface Agendamento {
@@ -124,6 +125,11 @@ const AgendamentosPage: React.FC = () => {
   }
 
   const getStatusLabel = (agendamento: Agendamento) => {
+    // Se o agendamento está cancelado, sempre exibir "Cancelado"
+    if (agendamento.status === "CANCELLED") {
+      return "Cancelado";
+    }
+
     // Se o pagamento estiver pendente, exibir status de pagamento
     if (agendamento.payment?.status === "PENDING") {
       return "Aguardando pagamento";
@@ -136,8 +142,12 @@ const AgendamentosPage: React.FC = () => {
     };
     return labels[agendamento.status] || agendamento.status;
   };
-
   const getStatusClass = (agendamento: Agendamento) => {
+    // Se o agendamento está cancelado, sempre usar classe de cancelado
+    if (agendamento.status === "CANCELLED") {
+      return "status-badge status-cancelado";
+    }
+
     // Se o pagamento estiver pendente, usar classe de pagamento pendente
     if (agendamento.payment?.status === "PENDING") {
       return "status-badge status-pending-payment";
@@ -452,7 +462,11 @@ const AgendamentosPage: React.FC = () => {
 
       {/* Toast de Feedback */}
       {toast && (
-        <div className={`toast toast-${toast.type}`}>{toast.message}</div>
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

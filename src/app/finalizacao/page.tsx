@@ -109,7 +109,10 @@ const FinalizacaoPage: React.FC = () => {
         vehicleCategory: categoria,
       };
 
-      const appointmentResp = await apiClient.post("/appointments", appointmentData);
+      const appointmentResp = await apiClient.post(
+        "/appointments",
+        appointmentData
+      );
       const appointmentId = appointmentResp.data.id;
 
       // ================================
@@ -148,11 +151,16 @@ const FinalizacaoPage: React.FC = () => {
           installment: 1,
         });
 
-        // REDIRECIONAR PARA TELA DE SUCESSO
-        router.push("/finalizacao/sucesso");
+        // REDIRECIONAR PARA HOME
+        setToast({
+          message: "Agendamento realizado com sucesso!",
+          type: "success",
+        });
+        setTimeout(() => {
+          router.push("/");
+        }, 2000);
         return;
       }
-
     } catch (error: any) {
       console.error("Erro ao finalizar:", error);
       const errorMessage =
@@ -204,8 +212,9 @@ const FinalizacaoPage: React.FC = () => {
       </header>
 
       <div
-        className={`finalizacao-container ${showPaymentCards ? "multiple-cards" : "single-card"
-          }`}
+        className={`finalizacao-container ${
+          showPaymentCards ? "multiple-cards" : "single-card"
+        }`}
       >
         {/* Card 1: Verificar Informações */}
         <div className={`card ${showPaymentCards ? "first-card" : ""}`}>
@@ -252,8 +261,8 @@ const FinalizacaoPage: React.FC = () => {
                     (car.placa
                       ? " - " + car.placa
                       : car.licensePlate
-                        ? " - " + car.licensePlate
-                        : "")}
+                      ? " - " + car.licensePlate
+                      : "")}
                 </option>
               ))}
             </select>
@@ -315,8 +324,9 @@ const FinalizacaoPage: React.FC = () => {
             <h2 className="card-title">Selecionar método de pagamento</h2>
 
             <div
-              className={`payment-option ${selectedPayment === "pix" ? "selected" : ""
-                }`}
+              className={`payment-option ${
+                selectedPayment === "pix" ? "selected" : ""
+              }`}
               onClick={() => setSelectedPayment("pix")}
             >
               <div className="payment-icon pix-icon">
@@ -341,13 +351,13 @@ const FinalizacaoPage: React.FC = () => {
             </div>
 
             <div
-              className={`payment-option ${selectedPayment === "cartao" ? "selected" : ""
-                }`}
+              className={`payment-option ${
+                selectedPayment === "cartao" ? "selected" : ""
+              }`}
               onClick={() => {
                 setSelectedPayment("cartao");
                 setShowCardForm(true);
               }}
-
             >
               <div className="payment-icon card-icon">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -438,15 +448,11 @@ const FinalizacaoPage: React.FC = () => {
       </div>
 
       {toast && (
-        <div
-          style={{ position: "fixed", top: 100, right: "2rem", zIndex: 9999 }}
-        >
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        </div>
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );
