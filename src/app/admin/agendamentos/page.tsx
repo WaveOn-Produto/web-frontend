@@ -89,7 +89,7 @@ export default function AdminAgendamentos() {
     const fetchAvailableTimeSlots = async () => {
       try {
         const response = await apiClient.get(
-          `/api/appointments/available-slots?date=${selectedDate}`
+          `/appointments/available-slots?date=${selectedDate}`
         );
         setAvailableTimeSlots(response.data.availableSlots);
       } catch (error) {
