@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import LoginHeader from "@/components/LoginHeader";
 import CarModal, { CarData } from "@/components/CarModal";
 import AddressModal, { AddressData } from "@/components/AddressModal";
+import "@/styles/app-css/login.css";
 import "@/styles/app-css/cadastro.css";
 import apiClient from "@/services/api";
 import { User } from "@/types/auth";
