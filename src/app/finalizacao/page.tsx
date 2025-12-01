@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,7 +10,7 @@ import AlertInfo from "@/components/AlertInfo";
 import "@/styles/app-css/finalizacao.css";
 import CardFormInline, { CardFormData } from "@/components/CardFormInline";
 
-const FinalizacaoPage: React.FC = () => {
+const FinalizacaoContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logout, loading } = useAuth();
@@ -25,8 +25,29 @@ const FinalizacaoPage: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
-  const [userCars, setUserCars] = useState<any[]>([]);
-  const [userAddresses, setUserAddresses] = useState<any[]>([]);
+  const [userCars, setUserCars] = useState<
+    Array<{
+      id: string;
+      brand?: string;
+      model?: string;
+      plate?: string;
+      category?: string;
+      marca?: string;
+      modelo?: string;
+      placa?: string;
+      licensePlate?: string;
+    }>
+  >([]);
+  const [userAddresses, setUserAddresses] = useState<
+    Array<{
+      id: string;
+      street?: string;
+      number?: string;
+      district?: string;
+      neighborhood?: string;
+      city?: string;
+    }>
+  >([]);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "warning";
@@ -52,10 +73,11 @@ const FinalizacaoPage: React.FC = () => {
           ]);
           setUserCars(carsResponse.data);
           setUserAddresses(addressesResponse.data);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("Erro ao carregar dados:", error);
+          const err = error as { response?: { status?: number } };
           // Só mostra erro se não for 401
-          if (error.response?.status !== 401) {
+          if (err.response?.status !== 401) {
             setToast({
               message: "Erro ao carregar dados. Tente novamente.",
               type: "error",
@@ -161,10 +183,11 @@ const FinalizacaoPage: React.FC = () => {
         }, 2000);
         return;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao finalizar:", error);
+      const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error.response?.data?.message ||
+        err.response?.data?.message ||
         "Erro ao finalizar agendamento. Tente novamente.";
       setToast({ message: errorMessage, type: "error" });
     }
@@ -455,6 +478,14 @@ const FinalizacaoPage: React.FC = () => {
         />
       )}
     </div>
+  );
+};
+
+const FinalizacaoPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <FinalizacaoContent />
+    </Suspense>
   );
 };
 

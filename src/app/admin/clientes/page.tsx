@@ -72,9 +72,10 @@ export default function AdminClientes() {
       setLoading(true);
       const response = await apiClient.get("/users/admin/all");
       setClients(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao buscar clientes:", error);
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 401 || err.response?.status === 403) {
         router.push("/login");
       }
     } finally {
