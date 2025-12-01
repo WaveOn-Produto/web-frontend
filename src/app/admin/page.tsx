@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        // Busca todos agendamentos do admin (sem verificação de role para debug)
+        
         const res = await apiClient.get("/appointments/admin/all");
         const appointments = res.data;
 
@@ -37,8 +37,9 @@ export default function AdminDashboard() {
             a.status === "COMPLETED" &&
             a.date?.slice(0, 7) === today.slice(0, 7)
         );
+        
         const receitaMes = concluidosMes.reduce(
-          (acc: number, a: any) => acc + (a.price || 0),
+          (acc: number, a: any) => acc + (a.priceCents || 0) / 100,
           0
         );
 
@@ -63,16 +64,19 @@ export default function AdminDashboard() {
           },
           {
             title: "Receita (Mês)",
-            value: `R$ ${receitaMes.toLocaleString("pt-BR")}`,
+            value: `R$ ${receitaMes.toLocaleString("pt-BR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`,
             icon: "💰",
             color: "#8b5cf6",
           },
         ]);
 
-        // Lista agendamentos de hoje para tabela
+        
         setRecentAppointments(agendamentosHoje);
       } catch (err) {
-        // Em caso de erro, mantém valores default
+      
       } finally {
         setLoading(false);
       }

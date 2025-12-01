@@ -19,7 +19,7 @@ export default function Hero() {
         </h1>
         <p className="hero-subtitle">
           Somos Especialistas em lavagem de veículos em domicílio com<br />
-          Qualidade, Segurança e Conveniência
+          Qualidade, Segurança e Comodidade
         </p>
         <button className="hero-button" onClick={scrollToServices}>
           Agendar

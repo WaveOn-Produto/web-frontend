@@ -36,13 +36,13 @@ export default function AgendamentoPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [userCars, setUserCars] = useState<Car[]>([]);
   const [categoryError, setCategoryError] = useState<string>("");
-  // Buscar carros do usuário ao carregar a tela
+  
   useEffect(() => {
     const fetchUserCars = async () => {
       if (!user) return;
       try {
         const response = await apiClient.get("/cars/my");
-        // Garante que o campo categoria está presente
+        
         const cars = Array.isArray(response.data)
           ? response.data.map((car: any) => ({
               id: car.id,
@@ -169,10 +169,10 @@ export default function AgendamentoPage() {
     ];
 
     try {
-      // Busca agendamentos do dia selecionado
       const response = await apiClient.get(
         `/appointments/available-slots?date=${date}`
       );
+
       const bookedSlots = response.data.bookedSlots || [];
 
       // Filtra horários passados se o dia selecionado for hoje
@@ -197,12 +197,14 @@ export default function AgendamentoPage() {
       }
 
       const availableSlots = filteredSlots.filter((slot) => {
+        
         if (bookedSlots.includes(slot)) {
           return false;
         }
 
         const currentTime = parseTime(slot);
 
+   
         for (const bookedSlot of bookedSlots) {
           const bookedTime = parseTime(bookedSlot);
           const timeDiff = Math.abs(currentTime - bookedTime);
@@ -218,8 +220,21 @@ export default function AgendamentoPage() {
       return availableSlots;
     } catch (error) {
       console.error("Erro ao buscar horários disponíveis:", error);
-      // Em caso de erro, retorna todos os slots filtrados
-      return filteredSlots;
+      
+      const now = new Date();
+      const selected = new Date(date + "T00:00:00");
+      if (
+        selected.getDate() === now.getDate() &&
+        selected.getMonth() === now.getMonth() &&
+        selected.getFullYear() === now.getFullYear()
+      ) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return allSlots.filter((slot) => {
+          const slotMinutes = parseTime(slot);
+          return slotMinutes > nowMinutes;
+        });
+      }
+      return allSlots;
     }
   };
 
@@ -276,7 +291,7 @@ export default function AgendamentoPage() {
       const newPrice = await fetchPriceByCategory(category, servico);
       setCurrentPrice(newPrice);
 
-      // Verifica se o usuário tem carro da categoria selecionada
+    
       const hasCar = userCars.some((car) => car.categoria === category);
       if (!hasCar) {
         setCategoryError(
@@ -304,7 +319,7 @@ export default function AgendamentoPage() {
       });
       return;
     }
-    // Redireciona para página de finalização com os dados do agendamento
+   
     const params = new URLSearchParams({
       servico,
       data: selectedDate,
@@ -314,7 +329,7 @@ export default function AgendamentoPage() {
     });
     router.push(`/finalizacao?${params.toString()}`);
   };
-  // Redireciona para a rota salva após login
+  
   useEffect(() => {
     if (user && showLoginModal && redirectPathRef.current) {
       router.push(redirectPathRef.current);
@@ -453,7 +468,7 @@ export default function AgendamentoPage() {
                         </option>
                       ))}
                     </select>
-                    {/* Mensagem de erro só aparece abaixo do campo de categoria */}
+                    
                     {availableSlots.length === 0 && (
                       <p className="time-rule-info">
                         Nenhum horário disponível. Lembre-se: deve haver pelo

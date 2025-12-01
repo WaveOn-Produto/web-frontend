@@ -7,27 +7,24 @@ import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/services/api";
 import "@/styles/app-css/admin.css";
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  categoryPrices: { category: string; price: number }[];
-  active: boolean;
+interface Pricing {
+  id: string;
+  serviceType: string;
+  vehicleCategory: string;
+  priceCents: number;
 }
 
 export default function AdminServicos() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [pricings, setPricings] = useState<Pricing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [editingPricing, setEditingPricing] = useState<Pricing | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    categoryPrices: [],
-    active: true,
-  });
+  const [priceInput, setPriceInput] = useState("");
+
+  const serviceTypes = ["Lavagem simples", "Lavagem completa"];
+  const categories = ["Hatch", "Sedan", "SUV", "Caminhonete"];
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "ADMIN")) {
@@ -37,54 +34,53 @@ export default function AdminServicos() {
 
   useEffect(() => {
     if (user?.role === "ADMIN") {
-      fetchProducts();
+      fetchPricings();
     }
   }, [user]);
 
-  const fetchProducts = async () => {
+  const fetchPricings = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get("/products/admin/all");
-      setProducts(response.data);
+      const response = await apiClient.get("/pricing");
+      setPricings(response.data);
     } catch (error) {
-      console.error("Erro ao buscar produtos:", error);
+      console.error("Erro ao buscar preços:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSaveProduct = async () => {
-    try {
-      if (selectedProduct) {
-        await apiClient.patch(`/products/${selectedProduct.id}`, formData);
-      } else {
-        await apiClient.post("/products", formData);
-      }
-      fetchProducts();
-      setShowModal(false);
-    } catch (error) {
-      console.error("Erro ao salvar produto:", error);
-    }
-  };
-
-  const handleEditProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      categoryPrices: product.categoryPrices,
-      active: product.active,
-    });
+  const handleEditPrice = (pricing: Pricing) => {
+    setEditingPricing(pricing);
+    setPriceInput((pricing.priceCents / 100).toFixed(2));
     setShowModal(true);
   };
 
-  const handleInactivateProduct = async (id: number) => {
+  const handleSavePrice = async () => {
+    if (!editingPricing) return;
+
     try {
-      await apiClient.patch(`/products/${id}/inactivate`);
-      fetchProducts();
+      const priceCents = Math.round(parseFloat(priceInput) * 100);
+
+      await apiClient.patch(`/pricing/${editingPricing.id}`, {
+        priceCents,
+      });
+
+      fetchPricings();
+      setShowModal(false);
+      setEditingPricing(null);
+      setPriceInput("");
     } catch (error) {
-      console.error("Erro ao inativar produto:", error);
+      console.error("Erro ao atualizar preço:", error);
+      alert("Erro ao atualizar preço. Tente novamente.");
     }
+  };
+
+  const getPriceForService = (serviceType: string, category: string) => {
+    const pricing = pricings.find(
+      (p) => p.serviceType === serviceType && p.vehicleCategory === category
+    );
+    return pricing ? (pricing.priceCents / 100).toFixed(2) : "-";
   };
 
   if (authLoading || (user?.role === "ADMIN" && loading)) {
@@ -110,208 +106,119 @@ export default function AdminServicos() {
 
       <main className="admin-content">
         <div className="admin-header">
-          <h1 className="page-title">Gerenciar Serviços</h1>
+          <h1 className="page-title">Gerenciar Preços dos Serviços</h1>
           <p className="page-subtitle">
-            Visualize, edite e gerencie todos os serviços
+            Edite os preços das lavagens por categoria de veículo
           </p>
         </div>
-
-        <button
-          className="btn-primary"
-          onClick={() => {
-            setSelectedProduct(null);
-            setFormData({
-              name: "",
-              description: "",
-              categoryPrices: [],
-              active: true,
-            });
-            setShowModal(true);
-          }}
-        >
-          Cadastrar Novo Serviço
-        </button>
 
         <div className="dashboard-section">
           <div className="table-container">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Nome</th>
-                  <th>Descrição</th>
-                  <th>Preços por Categoria</th>
-                  <th>Status</th>
-                  <th>Ações</th>
+                  <th>Serviço</th>
+                  <th>Hatch</th>
+                  <th>Sedan</th>
+                  <th>SUV</th>
+                  <th>Caminhonete</th>
                 </tr>
               </thead>
               <tbody>
-                {products.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      style={{ textAlign: "center", padding: "2rem" }}
-                    >
-                      Nenhum produto encontrado
-                    </td>
+                {serviceTypes.map((serviceType) => (
+                  <tr key={serviceType}>
+                    <td style={{ fontWeight: "600" }}>{serviceType}</td>
+                    {categories.map((category) => {
+                      const pricing = pricings.find(
+                        (p) =>
+                          p.serviceType === serviceType &&
+                          p.vehicleCategory === category
+                      );
+                      return (
+                        <td key={category}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                            }}
+                          >
+                            <span>
+                              R$ {getPriceForService(serviceType, category)}
+                            </span>
+                            {pricing && (
+                              <button
+                                className="btn-icon"
+                                onClick={() => handleEditPrice(pricing)}
+                                title="Editar preço"
+                              >
+                                ✏️
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
                   </tr>
-                ) : (
-                  products.map((product) => (
-                    <tr key={product.id}>
-                      <td>{product.name}</td>
-                      <td>{product.description}</td>
-                      <td>
-                        {product.categoryPrices
-                          .map(
-                            (catPrice) =>
-                              `${
-                                catPrice.category
-                              }: R$ ${catPrice.price.toFixed(2)}`
-                          )
-                          .join(", ")}
-                      </td>
-                      <td>{product.active ? "Ativo" : "Inativo"}</td>
-                      <td>
-                        <button
-                          className="btn-action btn-edit"
-                          onClick={() => handleEditProduct(product)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="btn-action btn-inactivate"
-                          onClick={() => handleInactivateProduct(product.id)}
-                        >
-                          Inativar
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {showModal && (
+        {showModal && editingPricing && (
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3 className="modal-title">
-                {selectedProduct ? "Editar Serviço" : "Cadastrar Serviço"}
-              </h3>
+              <h3 className="modal-title">Editar Preço</h3>
 
               <div className="form-group">
-                <label>Nome:</label>
+                <label>Serviço:</label>
                 <input
                   type="text"
                   className="form-input"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  value={editingPricing.serviceType}
+                  disabled
+                  style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
                 />
               </div>
 
               <div className="form-group">
-                <label>Descrição:</label>
-                <textarea
-                  className="form-textarea"
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                <label>Categoria:</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={editingPricing.vehicleCategory}
+                  disabled
+                  style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }}
                 />
               </div>
 
               <div className="form-group">
-                <label>Preços por Categoria:</label>
-                {formData.categoryPrices.map((catPrice, index) => (
-                  <div key={index} className="category-price-row">
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Categoria"
-                      value={catPrice.category}
-                      onChange={(e) => {
-                        const updatedPrices = [...formData.categoryPrices];
-                        updatedPrices[index].category = e.target.value;
-                        setFormData({
-                          ...formData,
-                          categoryPrices: updatedPrices,
-                        });
-                      }}
-                    />
-                    <input
-                      type="number"
-                      className="form-input"
-                      placeholder="Preço"
-                      value={catPrice.price}
-                      onChange={(e) => {
-                        const updatedPrices = [...formData.categoryPrices];
-                        updatedPrices[index].price = parseFloat(e.target.value);
-                        setFormData({
-                          ...formData,
-                          categoryPrices: updatedPrices,
-                        });
-                      }}
-                    />
-                    <button
-                      className="btn-secondary btn-remove"
-                      onClick={() => {
-                        const updatedPrices = formData.categoryPrices.filter(
-                          (_, i) => i !== index
-                        );
-                        setFormData({
-                          ...formData,
-                          categoryPrices: updatedPrices,
-                        });
-                      }}
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ))}
-                <button
-                  className="btn-primary btn-add"
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      categoryPrices: [
-                        ...formData.categoryPrices,
-                        { category: "", price: 0 },
-                      ],
-                    });
-                  }}
-                >
-                  Adicionar Categoria
-                </button>
-              </div>
-
-              <div className="form-group">
-                <label>Status:</label>
-                <select
-                  className="form-select"
-                  value={formData.active ? "active" : "inactive"}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      active: e.target.value === "active",
-                    })
-                  }
-                >
-                  <option value="active">Ativo</option>
-                  <option value="inactive">Inativo</option>
-                </select>
+                <label>Preço (R$):</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  value={priceInput}
+                  onChange={(e) => setPriceInput(e.target.value)}
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  autoFocus
+                />
               </div>
 
               <div className="modal-actions">
                 <button
-                  className="btn-secondary"
-                  onClick={() => setShowModal(false)}
+                  className="btn-primary"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingPricing(null);
+                    setPriceInput("");
+                  }}
                 >
                   Cancelar
                 </button>
-                <button className="btn-primary" onClick={handleSaveProduct}>
+                <button className="btn-primary" onClick={handleSavePrice}>
                   Salvar
                 </button>
               </div>
