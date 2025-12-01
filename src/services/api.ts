@@ -1,7 +1,8 @@
 import axios from "axios";
 
+const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const apiClient = axios.create({
-  baseURL: "http://localhost:3001/api"
+  baseURL: `${apiBase}/api`
 });
 
 // Interceptor para adicionar o token JWT automaticamente
