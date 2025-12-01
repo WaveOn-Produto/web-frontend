@@ -33,7 +33,6 @@ const FinalizacaoPage: React.FC = () => {
   const [torneira, setTorneira] = useState(false);
   const [tomada, setTomada] = useState(false);
 
-  // Redireciona para login se não estiver autenticado
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -132,8 +131,11 @@ const FinalizacaoPage: React.FC = () => {
       <header className="finalizacao-header">
         <Link href="/" className="logo">
           <img
-            src="/images/id-visual/WaveOn-claro.svg"
+            src="/images/id-visual/logo_claro.svg"
             alt="WaveOn Logo"
+            width="150"
+            height="60"
+            loading="eager"
             className="logo-img"
           />
         </Link>

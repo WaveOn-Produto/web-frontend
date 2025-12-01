@@ -98,7 +98,7 @@ export default function ServicesSection() {
               <p className="service-description">
                 • Externa Detalhada
                 <br /> • Interna Detalhada <br /> • Limpeza Detalhada dos Bancos{" "}
-                <br /> • Revitalização de Plasticos
+                <br /> • Revitalização de Plásticos
               </p>
               <div className="service-price">
                 A partir de R$ {minPrices["Lavagem completa"]}

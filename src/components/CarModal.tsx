@@ -34,14 +34,22 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
     category: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
 
   const validate = () => {
-    const newErrors = { name: "", plate: "", brand: "", model: "", category: "" };
+    const newErrors = {
+      name: "",
+      plate: "",
+      brand: "",
+      model: "",
+      category: "",
+    };
     let valid = true;
 
     if (!formData.name.trim()) {
@@ -111,14 +119,16 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={handleCancel}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <div className="modal-content">
         <h2 className="modal-title">Criar carro</h2>
 
         <form onSubmit={handleSubmit} className="modal-form">
           {/* Nome */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="name">Nome</label>
+            <label className="modal-label" htmlFor="name">
+              Nome
+            </label>
             <input
               id="name"
               type="text"
@@ -132,7 +142,9 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
 
           {/* Placa */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="plate">Placa</label>
+            <label className="modal-label" htmlFor="plate">
+              Placa
+            </label>
             <input
               id="plate"
               type="text"
@@ -141,12 +153,16 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
               value={formData.plate}
               onChange={handleChange}
             />
-            {errors.plate && <span className="modal-error">{errors.plate}</span>}
+            {errors.plate && (
+              <span className="modal-error">{errors.plate}</span>
+            )}
           </div>
 
           {/* Marca */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="brand">Marca</label>
+            <label className="modal-label" htmlFor="brand">
+              Marca
+            </label>
             <input
               id="brand"
               type="text"
@@ -155,12 +171,16 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
               value={formData.brand}
               onChange={handleChange}
             />
-            {errors.brand && <span className="modal-error">{errors.brand}</span>}
+            {errors.brand && (
+              <span className="modal-error">{errors.brand}</span>
+            )}
           </div>
 
           {/* Modelo */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="model">Modelo</label>
+            <label className="modal-label" htmlFor="model">
+              Modelo
+            </label>
             <input
               id="model"
               type="text"
@@ -169,12 +189,16 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
               value={formData.model}
               onChange={handleChange}
             />
-            {errors.model && <span className="modal-error">{errors.model}</span>}
+            {errors.model && (
+              <span className="modal-error">{errors.model}</span>
+            )}
           </div>
 
           {/* Categoria */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="category">Categoria</label>
+            <label className="modal-label" htmlFor="category">
+              Categoria
+            </label>
             <select
               id="category"
               className={`modal-select ${errors.category ? "input-error" : ""}`}
@@ -187,8 +211,9 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
               <option value="SUV">SUV</option>
               <option value="Caminhonete">Caminhonete</option>
             </select>
-            {errors.category && <span className="modal-error">{errors.category}</span>}
-         
+            {errors.category && (
+              <span className="modal-error">{errors.category}</span>
+            )}
           </div>
 
           {/* Botões */}
@@ -196,7 +221,11 @@ const CarModal: React.FC<CarModalProps> = ({ isOpen, onClose, onSave }) => {
             <button type="submit" className="modal-btn-primary">
               Cadastrar
             </button>
-            <button type="button" onClick={handleCancel} className="modal-btn-secondary">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="modal-btn-secondary"
+            >
               Voltar
             </button>
           </div>

@@ -31,24 +31,27 @@ interface Address {
 export default function PerfilPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuthContext();
-  
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-  
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  
+
   const [cars, setCars] = useState<Car[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
-  
+
   const [showCarModal, setShowCarModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showCarsDropdown, setShowCarsDropdown] = useState(false);
   const [showAddressesDropdown, setShowAddressesDropdown] = useState(false);
-  
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "warning";
+  } | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -61,7 +64,7 @@ export default function PerfilPage() {
       setFullName(user.name || "");
       setEmail(user.email || "");
       setPhone(user.phone || "");
-      
+
       // Busca carros e endereços do backend
       fetchCarsAndAddresses();
     }
@@ -71,25 +74,29 @@ export default function PerfilPage() {
     try {
       const [carsResponse, addressesResponse] = await Promise.all([
         apiClient.get("/cars/my"),
-        apiClient.get("/addresses/my")
+        apiClient.get("/addresses/my"),
       ]);
-      
-      setCars(carsResponse.data.map((car: any) => ({
-        id: car.id,
-        marca: car.brand,
-        modelo: car.model,
-        placa: car.plate || car.licensePlate,
-      })));
-      
-      setAddresses(addressesResponse.data.map((addr: any) => ({
-        id: addr.id,
-        rua: addr.street,
-        numero: addr.number,
-        bairro: addr.district || addr.neighborhood,
-        cidade: addr.city,
-        estado: addr.state || "",
-        cep: addr.cep,
-      })));
+
+      setCars(
+        carsResponse.data.map((car: any) => ({
+          id: car.id,
+          marca: car.brand,
+          modelo: car.model,
+          placa: car.plate || car.licensePlate,
+        }))
+      );
+
+      setAddresses(
+        addressesResponse.data.map((addr: any) => ({
+          id: addr.id,
+          rua: addr.street,
+          numero: addr.number,
+          bairro: addr.district || addr.neighborhood,
+          cidade: addr.city,
+          estado: addr.state || "",
+          cep: addr.cep,
+        }))
+      );
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     }
@@ -129,22 +136,22 @@ export default function PerfilPage() {
   const handleAddCar = async (carData: any) => {
     try {
       const response = await apiClient.post("/cars", carData);
-      
+
       const newCar: Car = {
         id: response.data.id,
         marca: response.data.brand,
         modelo: response.data.model,
         placa: response.data.plate || response.data.licensePlate,
       };
-      
+
       setCars([...cars, newCar]);
       setShowCarModal(false);
       setToast({ message: "Veículo adicionado com sucesso!", type: "success" });
     } catch (error: any) {
       console.error("Erro ao adicionar veículo:", error);
-      setToast({ 
-        message: error.response?.data?.message || "Erro ao adicionar veículo", 
-        type: "error" 
+      setToast({
+        message: error.response?.data?.message || "Erro ao adicionar veículo",
+        type: "error",
       });
     }
   };
@@ -159,7 +166,7 @@ export default function PerfilPage() {
         district: addressData.bairro,
         city: addressData.cidade,
       });
-      
+
       const newAddress: Address = {
         id: response.data.id,
         rua: response.data.street,
@@ -169,15 +176,18 @@ export default function PerfilPage() {
         estado: response.data.state || "",
         cep: response.data.cep,
       };
-      
+
       setAddresses([...addresses, newAddress]);
       setShowAddressModal(false);
-      setToast({ message: "Endereço adicionado com sucesso!", type: "success" });
+      setToast({
+        message: "Endereço adicionado com sucesso!",
+        type: "success",
+      });
     } catch (error: any) {
       console.error("Erro ao adicionar endereço:", error);
-      setToast({ 
-        message: error.response?.data?.message || "Erro ao adicionar endereço", 
-        type: "error" 
+      setToast({
+        message: error.response?.data?.message || "Erro ao adicionar endereço",
+        type: "error",
       });
     }
   };
@@ -196,8 +206,8 @@ export default function PerfilPage() {
 
   return (
     <div className="perfil-page">
-      <NavBar />
-      
+      <NavBar logoVariant="light" />
+
       <div className="perfil-container">
         <div className="perfil-card">
           <div className="perfil-header">
@@ -274,7 +284,9 @@ export default function PerfilPage() {
                     placeholder="(00)00000-0000"
                   />
                 ) : (
-                  <span className="field-value">{phone || "Não informado"}</span>
+                  <span className="field-value">
+                    {phone || "Não informado"}
+                  </span>
                 )}
                 <button
                   className="edit-icon-btn"
@@ -299,7 +311,9 @@ export default function PerfilPage() {
                 <select
                   className="dropdown-select"
                   value=""
-                  onChange={(e) => setShowCarsDropdown(e.target.value === "show")}
+                  onChange={(e) =>
+                    setShowCarsDropdown(e.target.value === "show")
+                  }
                   onClick={() => setShowCarsDropdown(!showCarsDropdown)}
                 >
                   <option value="">Veículos</option>
@@ -324,8 +338,12 @@ export default function PerfilPage() {
                 <select
                   className="dropdown-select"
                   value=""
-                  onChange={(e) => setShowAddressesDropdown(e.target.value === "show")}
-                  onClick={() => setShowAddressesDropdown(!showAddressesDropdown)}
+                  onChange={(e) =>
+                    setShowAddressesDropdown(e.target.value === "show")
+                  }
+                  onClick={() =>
+                    setShowAddressesDropdown(!showAddressesDropdown)
+                  }
                 >
                   <option value="">Endereços</option>
                   {addresses.map((address) => (
@@ -345,7 +363,10 @@ export default function PerfilPage() {
           </div>
 
           <div className="perfil-actions">
-            <button className="btn-change-password" onClick={handleChangePassword}>
+            <button
+              className="btn-change-password"
+              onClick={handleChangePassword}
+            >
               Trocar Senha
             </button>
             <button className="btn-back" onClick={() => router.push("/")}>

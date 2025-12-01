@@ -26,7 +26,7 @@ export default function AgendamentoPage() {
 
   const descricaoServicos: { [key: string]: string } = {
     "Lavagem simples":
-      "• Lavagem externa,<br /> • Limpeza Interna Simples.<br />• Limpeza Superficial de bancos.<br /> • Limpeza Simples de rodas, Pneus e Caixa de rodas. <br /> • Selante de Pneus.",
+      "• Lavagem externa.<br /> • Limpeza Interna Simples.<br />• Limpeza Superficial de bancos.<br /> • Limpeza Simples de rodas, Pneus e Caixa de rodas. <br /> • Selante de Pneus.",
     "Lavagem completa":
       "• Lavagem Externa Detalhada. <br /> • Desincrustação de emblemas. <br /> • Limpeza Interna Detalhada.<br /> • Limpeza de Bancos detalhada. <br /> • Revitalização de Plasticos Internos <br/>e Externos 30 dias.<br /> • Selante de Pneus",
   };
@@ -175,7 +175,7 @@ export default function AgendamentoPage() {
 
       const bookedSlots = response.data.bookedSlots || [];
 
-      // Filtra horários passados se o dia selecionado for hoje
+      
       const now = new Date();
       const selected = new Date(date + "T00:00:00");
       let filteredSlots = allSlots;
@@ -187,7 +187,7 @@ export default function AgendamentoPage() {
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
         filteredSlots = allSlots.filter((slot) => {
           const slotMinutes = parseTime(slot);
-          // Exibe apenas horários estritamente futuros
+         
           return slotMinutes > nowMinutes;
         });
       }

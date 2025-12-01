@@ -11,11 +11,13 @@ interface Appointment {
   id: number;
   date: string;
   timeSlot: string;
+  time: string;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
   observations?: string;
   serviceType: string;
   vehicleCategory: string;
   totalPrice: number;
+  priceCents: number;
   user: {
     id: number;
     name: string;
@@ -27,6 +29,8 @@ interface Appointment {
     brand: string;
     model: string;
     licensePlate: string;
+    plate: string;
+    category?: string;
   };
   address: {
     id: number;
@@ -34,9 +38,11 @@ interface Appointment {
     number: string;
     complement?: string;
     neighborhood: string;
+    district: string;
     city: string;
     state: string;
     zipCode: string;
+    cep: string;
   };
 }
 
@@ -162,13 +168,11 @@ export default function AdminAgendamentos() {
     try {
       await apiClient.patch(
         `/appointments/${selectedAppointment.id}/observations`,
-        {
-          observations: observacoes,
-        }
+        { observations: observacoes }
       );
       showToast("Observação salva com sucesso!", "success");
       setShowObsModal(false);
-      fetchAppointments(); // Recarregar lista
+      fetchAppointments();
     } catch (error) {
       console.error("Erro ao salvar observação:", error);
       showToast("Erro ao salvar observação", "error");
@@ -179,7 +183,7 @@ export default function AdminAgendamentos() {
     try {
       await apiClient.patch(`/appointments/${id}/cancel`);
       showToast("🚫 Agendamento cancelado com sucesso!", "success");
-      fetchAppointments(); // Recarregar lista
+      fetchAppointments();
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
       showToast(
@@ -193,7 +197,7 @@ export default function AdminAgendamentos() {
     try {
       await apiClient.patch(`/appointments/${id}/complete`);
       showToast("✅ Agendamento concluído com sucesso!", "success");
-      fetchAppointments(); // Recarregar lista
+      fetchAppointments();
     } catch (error) {
       console.error("Erro ao concluir agendamento:", error);
       showToast(
@@ -210,7 +214,7 @@ export default function AdminAgendamentos() {
         prev.filter((timeSlot) => timeSlot !== selectedTimeSlot)
       );
       showToast("✅ Horário marcado com sucesso!", "success");
-      fetchAppointments(); // Atualizar lista de agendamentos
+      fetchAppointments();
     } catch (error) {
       console.error("Erro ao marcar horário:", error);
       showToast("❌ Erro ao marcar horário. Tente novamente.", "error");
@@ -218,10 +222,8 @@ export default function AdminAgendamentos() {
   };
 
   const filteredAppointments = appointments.filter((apt) => {
-    // Filtro de status
     if (filterStatus !== "all" && apt.status !== filterStatus) return false;
 
-    // Filtro de data
     if (filterDate !== "all") {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -273,7 +275,6 @@ export default function AdminAgendamentos() {
           </p>
         </div>
 
-        {/* Filtros */}
         <div className="filters-container">
           <div className="filter-group">
             <label>Data:</label>
@@ -304,7 +305,6 @@ export default function AdminAgendamentos() {
           </div>
         </div>
 
-        {/* Tabela de Agendamentos */}
         <div className="dashboard-section">
           <div className="table-container">
             <table className="data-table">
@@ -564,7 +564,7 @@ export default function AdminAgendamentos() {
 
               <div className="modal-actions">
                 <button
-                  className="btn-secondary"
+                  className="btn-primary"
                   onClick={() => setShowObsModal(false)}
                 >
                   Cancelar

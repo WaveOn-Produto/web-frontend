@@ -8,9 +8,12 @@ export default function LoginHeader() {
       <Link href="/" aria-label="Ir para a Home.">
         <div className="login-logo">
           <img
-            src="\images\id-visual\WaveOn-claro.svg"
+            src="/images/id-visual/logo_escuro.svg"
             alt="WaveOn Logo"
             className="login-logo-img"
+            loading="eager"
+            width="150"
+            height="60"
           />
         </div>
       </Link>

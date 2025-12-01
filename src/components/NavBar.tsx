@@ -8,9 +8,13 @@ import { MdAdminPanelSettings } from "react-icons/md";
 
 interface NavBarProps {
   showNavLinks?: boolean;
+  logoVariant?: "dark" | "light";
 }
 
-export default function NavBar({ showNavLinks = true }: NavBarProps) {
+export default function NavBar({
+  showNavLinks = true,
+  logoVariant = "dark",
+}: NavBarProps) {
   const { isAuthenticated, logout, user } = useAuthContext();
 
   const handleLogout = () => {
@@ -24,6 +28,11 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
     return classes;
   };
 
+  const logoSrc =
+    logoVariant === "light"
+      ? "/images/id-visual/logo_claro.svg?variant=light"
+      : "/images/id-visual/logo_escuro.svg?variant=dark";
+
   return (
     <header className={getHeaderClass()}>
       <Link href="/" aria-label="Ir para a Home.">
@@ -32,9 +41,13 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
             <span className="logo-text">WaveOn</span>
           ) : (
             <img
-              src="/images/id-visual/WaveOn.svg"
+              src={logoSrc}
               alt="Logo WaveOn"
               className="logo-img"
+              loading="eager"
+              width="150"
+              height="60"
+              key={logoSrc}
             />
           )}
         </div>
@@ -44,13 +57,21 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
         <nav className="nav-links">
           {isAuthenticated ? (
             <>
-              {user?.role === 'ADMIN' && (
-                <Link href="/admin" className="nav-link admin-link" title="Painel Admin">
+              {user?.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="nav-link admin-link"
+                  title="Painel Admin"
+                >
                   <MdAdminPanelSettings />
                   <span>Painel Admin</span>
                 </Link>
               )}
-              <Link href="/agendamentos" className="nav-link" title="Meus Agendamentos">
+              <Link
+                href="/agendamentos"
+                className="nav-link"
+                title="Meus Agendamentos"
+              >
                 <FaCalendarAlt />
                 <span>Agendamentos</span>
               </Link>
@@ -58,7 +79,11 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
                 <FaUser />
                 <span>Perfil</span>
               </Link>
-              <button onClick={handleLogout} className="logout-btn" title="Sair">
+              <button
+                onClick={handleLogout}
+                className="logout-btn"
+                title="Sair"
+              >
                 <RiLogoutBoxRLine />
                 <span>Sair</span>
               </button>

@@ -61,7 +61,6 @@ const LoginPage: React.FC = () => {
         email,
         password,
       });
-      console.log("Resposta do backend:", response.data);
       login(response.data.access_token, response.data.user);
       setSuccess("Login realizado com sucesso! Redirecionando...");
       setTimeout(() => {

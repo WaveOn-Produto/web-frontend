@@ -32,8 +32,13 @@ const AgendamentosPage: React.FC = () => {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [loadingAgendamentos, setLoadingAgendamentos] = useState(true);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(
+    null
+  );
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     if (!loading && user) {
@@ -69,7 +74,10 @@ const AgendamentosPage: React.FC = () => {
 
     try {
       await apiClient.patch(`/appointments/${appointmentToCancel}/cancel`);
-      setToast({ message: "Agendamento cancelado com sucesso!", type: "success" });
+      setToast({
+        message: "Agendamento cancelado com sucesso!",
+        type: "success",
+      });
       fetchAgendamentos();
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
@@ -84,7 +92,7 @@ const AgendamentosPage: React.FC = () => {
     try {
       const response = await apiClient.get(`/appointments/${id}/repeat`);
       const { serviceType, vehicleCategory, carId, addressId } = response.data;
-      
+
       // Redireciona para página de agendamento com os dados pré-preenchidos
       window.location.href = `/agendamento?servico=${serviceType}&categoria=${vehicleCategory}`;
     } catch (error) {
@@ -112,7 +120,7 @@ const AgendamentosPage: React.FC = () => {
     const labels: { [key: string]: string } = {
       SCHEDULED: "Agendado",
       COMPLETED: "Concluído",
-      CANCELLED: "Cancelado"
+      CANCELLED: "Cancelado",
     };
     return labels[status] || status;
   };
@@ -121,14 +129,14 @@ const AgendamentosPage: React.FC = () => {
     const statusMap: { [key: string]: string } = {
       SCHEDULED: "agendado",
       COMPLETED: "concluido",
-      CANCELLED: "cancelado"
+      CANCELLED: "cancelado",
     };
     return `status-badge status-${statusMap[status] || status.toLowerCase()}`;
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    return date.toLocaleDateString("pt-BR");
   };
 
   const formatPrice = (priceCents: number) => {
@@ -141,16 +149,38 @@ const AgendamentosPage: React.FC = () => {
       <header className="agendamentos-header">
         <Link href="/" className="logo">
           <img
-            src="/images/id-visual/WaveOn-claro.svg"
+            src="/images/id-visual/logo_claro.svg?variant=light"
             alt="WaveOn Logo"
+            width="150"
+            height="60"
+            loading="eager"
             className="logo-img"
+            key="logo-agendamentos"
           />
         </Link>
         <div className="header-actions">
-          <Link href="/perfil" className="icon-button" aria-label="Ir para perfil">
+          <Link
+            href="/perfil"
+            className="icon-button"
+            aria-label="Ir para perfil"
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="12" cy="7" r="4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path
+                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="12"
+                cy="7"
+                r="4"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </Link>
           <button className="sair-button">Sair</button>
@@ -160,7 +190,9 @@ const AgendamentosPage: React.FC = () => {
       <div className="agendamentos-container">
         <div className="page-header">
           <h1 className="page-title">Meus Agendamentos</h1>
-          <p className="page-subtitle">Acompanhe todos os seus serviços agendados</p>
+          <p className="page-subtitle">
+            Acompanhe todos os seus serviços agendados
+          </p>
         </div>
 
         <div className="agendamentos-grid">
@@ -176,40 +208,115 @@ const AgendamentosPage: React.FC = () => {
               <div className="card-body">
                 <div className="info-row">
                   <div className="info-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="info-icon">
-                      <rect x="3" y="4" width="18" height="18" rx="2" stroke="#3A94E7" strokeWidth="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6" stroke="#3A94E7" strokeWidth="2" strokeLinecap="round"/>
-                      <line x1="8" y1="2" x2="8" y2="6" stroke="#3A94E7" strokeWidth="2" strokeLinecap="round"/>
-                      <line x1="3" y1="10" x2="21" y2="10" stroke="#3A94E7" strokeWidth="2"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="info-icon"
+                    >
+                      <rect
+                        x="3"
+                        y="4"
+                        width="18"
+                        height="18"
+                        rx="2"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                      />
+                      <line
+                        x1="16"
+                        y1="2"
+                        x2="16"
+                        y2="6"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="8"
+                        y1="2"
+                        x2="8"
+                        y2="6"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="3"
+                        y1="10"
+                        x2="21"
+                        y2="10"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                      />
                     </svg>
                     <div className="info-content">
                       <span className="info-label">Data e Hora</span>
-                      <span className="info-value">{formatDate(agendamento.date)} às {agendamento.time}</span>
+                      <span className="info-value">
+                        {formatDate(agendamento.date)} às {agendamento.time}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="info-row">
                   <div className="info-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="info-icon">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#3A94E7" strokeWidth="2"/>
-                      <circle cx="12" cy="10" r="3" stroke="#3A94E7" strokeWidth="2"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="info-icon"
+                    >
+                      <path
+                        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                      />
+                      <circle
+                        cx="12"
+                        cy="10"
+                        r="3"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                      />
                     </svg>
                     <div className="info-content">
                       <span className="info-label">Endereço</span>
-                      <span className="info-value">{agendamento.address.street}, {agendamento.address.number} - {agendamento.address.district}, {agendamento.address.city}</span>
+                      <span className="info-value">
+                        {agendamento.address.street},{" "}
+                        {agendamento.address.number} -{" "}
+                        {agendamento.address.district},{" "}
+                        {agendamento.address.city}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="info-row">
                   <div className="info-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="info-icon">
-                      <path d="M5 17h14M5 17l1.5-5h11L19 17M5 17c-1.657 0-3-1.343-3-3v-1h20v1c0 1.657-1.343 3-3 3M8 12V7c0-2.209 1.791-4 4-4s4 1.791 4 4v5" stroke="#3A94E7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="info-icon"
+                    >
+                      <path
+                        d="M5 17h14M5 17l1.5-5h11L19 17M5 17c-1.657 0-3-1.343-3-3v-1h20v1c0 1.657-1.343 3-3 3M8 12V7c0-2.209 1.791-4 4-4s4 1.791 4 4v5"
+                        stroke="#3A94E7"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     <div className="info-content">
                       <span className="info-label">Veículo</span>
-                      <span className="info-value">{agendamento.car.brand} {agendamento.car.model} - {agendamento.car.plate}</span>
+                      <span className="info-value">
+                        {agendamento.car.brand} {agendamento.car.model} -{" "}
+                        {agendamento.car.plate}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -217,17 +324,29 @@ const AgendamentosPage: React.FC = () => {
                 <div className="card-footer">
                   <div className="valor-total">
                     <span className="valor-label">Valor:</span>
-                    <span className="valor-value">R$ {formatPrice(agendamento.priceCents)}</span>
+                    <span className="valor-value">
+                      R$ {formatPrice(agendamento.priceCents)}
+                    </span>
                   </div>
-                  
+
                   <div className="card-actions">
                     {agendamento.status === "SCHEDULED" && (
                       <>
-                        <button className="btn-danger" onClick={() => handleCancelClick(agendamento.id)}>Cancelar</button>
+                        <button
+                          className="btn-danger"
+                          onClick={() => handleCancelClick(agendamento.id)}
+                        >
+                          Cancelar
+                        </button>
                       </>
                     )}
                     {agendamento.status === "COMPLETED" && (
-                      <button className="btn-primary" onClick={() => handleRepeat(agendamento.id)}>Agendar Novamente</button>
+                      <button
+                        className="btn-primary"
+                        onClick={() => handleRepeat(agendamento.id)}
+                      >
+                        Agendar Novamente
+                      </button>
                     )}
                   </div>
                 </div>
@@ -239,13 +358,46 @@ const AgendamentosPage: React.FC = () => {
         {agendamentos.length === 0 && (
           <div className="empty-state">
             <svg width="120" height="120" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="4" width="18" height="18" rx="2" stroke="#CCCCCC" strokeWidth="2"/>
-              <line x1="16" y1="2" x2="16" y2="6" stroke="#CCCCCC" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="8" y1="2" x2="8" y2="6" stroke="#CCCCCC" strokeWidth="2" strokeLinecap="round"/>
-              <line x1="3" y1="10" x2="21" y2="10" stroke="#CCCCCC" strokeWidth="2"/>
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="18"
+                rx="2"
+                stroke="#CCCCCC"
+                strokeWidth="2"
+              />
+              <line
+                x1="16"
+                y1="2"
+                x2="16"
+                y2="6"
+                stroke="#CCCCCC"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <line
+                x1="8"
+                y1="2"
+                x2="8"
+                y2="6"
+                stroke="#CCCCCC"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <line
+                x1="3"
+                y1="10"
+                x2="21"
+                y2="10"
+                stroke="#CCCCCC"
+                strokeWidth="2"
+              />
             </svg>
             <h2 className="empty-title">Nenhum agendamento encontrado</h2>
-            <p className="empty-text">Você ainda não possui agendamentos. Que tal fazer o primeiro?</p>
+            <p className="empty-text">
+              Você ainda não possui agendamentos. Que tal fazer o primeiro?
+            </p>
             <Link href="/agendamento" className="btn-primary">
               Fazer Agendamento
             </Link>
@@ -255,12 +407,20 @@ const AgendamentosPage: React.FC = () => {
 
       {/* Modal de Confirmação de Cancelamento */}
       {showCancelModal && (
-        <div className="modal-overlay" onClick={() => setShowCancelModal(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowCancelModal(false)}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3 className="modal-title">Cancelar Agendamento</h3>
-            <p className="modal-message">Tem certeza que deseja cancelar este agendamento?</p>
+            <p className="modal-message">
+              Tem certeza que deseja cancelar este agendamento?
+            </p>
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setShowCancelModal(false)}>
+              <button
+                className="btn-secondary"
+                onClick={() => setShowCancelModal(false)}
+              >
                 Voltar
               </button>
               <button className="btn-danger" onClick={confirmCancel}>
@@ -273,9 +433,7 @@ const AgendamentosPage: React.FC = () => {
 
       {/* Toast de Feedback */}
       {toast && (
-        <div className={`toast toast-${toast.type}`}>
-          {toast.message}
-        </div>
+        <div className={`toast toast-${toast.type}`}>{toast.message}</div>
       )}
     </div>
   );

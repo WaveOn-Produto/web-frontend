@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import LoginHeader from "@/components/LoginHeader";
 import CarModal, { CarData } from "@/components/CarModal";
 import AddressModal, { AddressData } from "@/components/AddressModal";
@@ -18,6 +20,9 @@ import {
 } from "react-icons/fa";
 
 const RegisterPage: React.FC = () => {
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
+  const { login } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -80,8 +85,6 @@ const RegisterPage: React.FC = () => {
       valid = false;
     }
 
-    // Campos opcionais: cellphone, carro e endereco não são obrigatórios para o backend
-
     setErrors(newErrors);
     return valid;
   }
@@ -95,28 +98,21 @@ const RegisterPage: React.FC = () => {
 
   const handleSaveCar = (car: CarData) => {
     setCarsList((prev) => [...prev, car]);
-    console.log("Carro salvo:", car);
   };
 
   const handleSaveAddress = (address: AddressData) => {
     setAddressList((prev) => [...prev, address]);
-    console.log("Endereço salvo:", address);
   };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log("Formulário submetido!");
-    console.log("Dados do formulário:", form);
 
     setSuccess("");
     setServerError("");
 
     if (!validate()) {
-      console.log("Validação falhou");
       return;
     }
-
-    console.log("Validação passou, enviando para backend...");
 
     try {
       const payload = {
@@ -126,15 +122,11 @@ const RegisterPage: React.FC = () => {
         phone: form.cellphone || undefined,
       };
 
-      console.log("Payload:", payload);
-
       const response = await apiClient.post<User>("/users/register", payload);
 
-      console.log("Resposta do backend:", response.data);
+      setSuccess("Conta criada com sucesso! Fazendo login...");
 
-      setSuccess("Conta criada com sucesso! Redirecionando para login...");
-
-      // Autenticar o usuário após o cadastro
+      // Faz login automático após cadastro
       try {
         const loginPayload = {
           email: form.email,
@@ -142,18 +134,19 @@ const RegisterPage: React.FC = () => {
         };
         const loginResponse = await apiClient.post("/auth/login", loginPayload);
         const token = loginResponse.data.access_token;
-        localStorage.setItem("authToken", token); // Armazena o token
+        const userData = loginResponse.data.user;
+
+        // Usa o hook de autenticação para salvar token e usuário
+        login(token, userData);
 
         const config = { headers: { Authorization: `Bearer ${token}` } };
 
-        // Validação do token
         if (!token) {
           console.error("Token de autenticação não encontrado.");
           setServerError("Erro de autenticação. Por favor, tente novamente.");
           return;
         }
 
-        // Ajustar payload para carros e endereços
         for (const car of carsList) {
           try {
             const carPayload = {
@@ -174,7 +167,7 @@ const RegisterPage: React.FC = () => {
           try {
             const addressPayload = {
               cep: address.cep,
-              street: address.rua,
+              street: address.endereco,
               number: address.numero,
               complement: address.complemento,
               district: address.bairro,
@@ -188,7 +181,6 @@ const RegisterPage: React.FC = () => {
             );
           }
         }
-        console.log("Carros e endereços enviados com sucesso!");
       } catch (error) {
         console.error(
           "Erro ao autenticar ou enviar carros e endereços:",
@@ -200,10 +192,16 @@ const RegisterPage: React.FC = () => {
         return;
       }
 
-      // Redireciona para login após 2 segundos
+      // Atualiza mensagem e redireciona
+      setSuccess("Login realizado com sucesso! Redirecionando...");
+
       setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
+        if (redirect) {
+          window.location.href = redirect;
+        } else {
+          window.location.href = "/";
+        }
+      }, 1500);
     } catch (error: any) {
       console.error("Erro no cadastro:", error);
       console.error("Detalhes do erro:", error.response?.data);
@@ -263,7 +261,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Email */}
             <div className="input-group">
               <label className="input-label" htmlFor="email">
                 Email
@@ -286,7 +283,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Senha */}
             <div className="input-group">
               <label className="input-label" htmlFor="password">
                 Senha
@@ -309,7 +305,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Celular */}
             <div className="input-group">
               <label className="input-label" htmlFor="cellphone">
                 Celular
@@ -332,9 +327,7 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Carros e Endereços lado a lado */}
             <div className="side-by-side-fields">
-              {/* Carros */}
               <div className="input-group half-width">
                 <label className="input-label" htmlFor="carro">
                   Carros
@@ -368,7 +361,6 @@ const RegisterPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Endereços */}
               <div className="input-group half-width">
                 <label className="input-label" htmlFor="endereco">
                   Endereços
@@ -406,7 +398,6 @@ const RegisterPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Botões */}
             <div
               style={{
                 display: "flex",
@@ -425,14 +416,12 @@ const RegisterPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de Carros */}
       <CarModal
         isOpen={isCarModalOpen}
         onClose={() => setIsCarModalOpen(false)}
         onSave={handleSaveCar}
       />
 
-      {/* Modal de Endereços */}
       <AddressModal
         isOpen={isAddressModalOpen}
         onClose={() => setIsAddressModalOpen(false)}

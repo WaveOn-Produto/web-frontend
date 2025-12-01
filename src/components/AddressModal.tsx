@@ -18,7 +18,11 @@ export interface AddressData {
   cidade: string;
 }
 
-const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) => {
+const AddressModal: React.FC<AddressModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+}) => {
   const [formData, setFormData] = useState<AddressData>({
     cep: "",
     endereco: "",
@@ -44,7 +48,14 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
   };
 
   const validate = () => {
-    const newErrors = { cep: "", endereco: "", numero: "", complemento: "", bairro: "", cidade: "" };
+    const newErrors = {
+      cep: "",
+      endereco: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+    };
     let valid = true;
 
     if (!formData.cep.trim()) {
@@ -117,14 +128,16 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={handleCancel}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <div className="modal-content">
         <h2 className="modal-title">Criar endereço</h2>
 
         <form onSubmit={handleSubmit} className="modal-form">
           {/* CEP */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="cep">Cep</label>
+            <label className="modal-label" htmlFor="cep">
+              Cep
+            </label>
             <input
               id="cep"
               type="text"
@@ -138,7 +151,9 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
 
           {/* Endereço */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="endereco">Endereço</label>
+            <label className="modal-label" htmlFor="endereco">
+              Endereço
+            </label>
             <input
               id="endereco"
               type="text"
@@ -147,12 +162,16 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
               value={formData.endereco}
               onChange={handleChange}
             />
-            {errors.endereco && <span className="modal-error">{errors.endereco}</span>}
+            {errors.endereco && (
+              <span className="modal-error">{errors.endereco}</span>
+            )}
           </div>
 
           {/* Número */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="numero">Número</label>
+            <label className="modal-label" htmlFor="numero">
+              Número
+            </label>
             <input
               id="numero"
               type="text"
@@ -161,26 +180,36 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
               value={formData.numero}
               onChange={handleChange}
             />
-            {errors.numero && <span className="modal-error">{errors.numero}</span>}
+            {errors.numero && (
+              <span className="modal-error">{errors.numero}</span>
+            )}
           </div>
 
           {/* Complemento */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="complemento">Complemento</label>
+            <label className="modal-label" htmlFor="complemento">
+              Complemento
+            </label>
             <input
               id="complemento"
               type="text"
               placeholder="Complemento"
-              className={`modal-input ${errors.complemento ? "input-error" : ""}`}
+              className={`modal-input ${
+                errors.complemento ? "input-error" : ""
+              }`}
               value={formData.complemento}
               onChange={handleChange}
             />
-            {errors.complemento && <span className="modal-error">{errors.complemento}</span>}
+            {errors.complemento && (
+              <span className="modal-error">{errors.complemento}</span>
+            )}
           </div>
 
           {/* Bairro */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="bairro">Bairro</label>
+            <label className="modal-label" htmlFor="bairro">
+              Bairro
+            </label>
             <input
               id="bairro"
               type="text"
@@ -189,12 +218,16 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
               value={formData.bairro}
               onChange={handleChange}
             />
-            {errors.bairro && <span className="modal-error">{errors.bairro}</span>}
+            {errors.bairro && (
+              <span className="modal-error">{errors.bairro}</span>
+            )}
           </div>
 
           {/* Cidade */}
           <div className="modal-input-group">
-            <label className="modal-label" htmlFor="cidade">Cidade</label>
+            <label className="modal-label" htmlFor="cidade">
+              Cidade
+            </label>
             <input
               id="cidade"
               type="text"
@@ -203,7 +236,9 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
               value={formData.cidade}
               onChange={handleChange}
             />
-            {errors.cidade && <span className="modal-error">{errors.cidade}</span>}
+            {errors.cidade && (
+              <span className="modal-error">{errors.cidade}</span>
+            )}
           </div>
 
           {/* Botões */}
@@ -211,7 +246,11 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave }) 
             <button type="submit" className="modal-btn-primary">
               Cadastrar
             </button>
-            <button type="button" onClick={handleCancel} className="modal-btn-secondary">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="modal-btn-secondary"
+            >
               Voltar
             </button>
           </div>
