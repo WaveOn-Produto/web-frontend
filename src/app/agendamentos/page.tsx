@@ -13,6 +13,13 @@ interface Agendamento {
   time: string;
   priceCents: number;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
+  payment?: {
+    id: string;
+    status: "PENDING" | "APPROVED" | "REJECTED";
+    type: "PIX" | "CARD";
+    qrCode?: string;
+    qrCodeBase64?: string;
+  };
   car: {
     name: string;
     plate: string;
@@ -116,22 +123,34 @@ const AgendamentosPage: React.FC = () => {
     return null;
   }
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (agendamento: Agendamento) => {
+    // Se o pagamento estiver pendente, exibir status de pagamento
+    if (agendamento.payment?.status === "PENDING") {
+      return "Aguardando pagamento";
+    }
+
     const labels: { [key: string]: string } = {
       SCHEDULED: "Agendado",
       COMPLETED: "Concluído",
       CANCELLED: "Cancelado",
     };
-    return labels[status] || status;
+    return labels[agendamento.status] || agendamento.status;
   };
 
-  const getStatusClass = (status: string) => {
+  const getStatusClass = (agendamento: Agendamento) => {
+    // Se o pagamento estiver pendente, usar classe de pagamento pendente
+    if (agendamento.payment?.status === "PENDING") {
+      return "status-badge status-pending-payment";
+    }
+
     const statusMap: { [key: string]: string } = {
       SCHEDULED: "agendado",
       COMPLETED: "concluido",
       CANCELLED: "cancelado",
     };
-    return `status-badge status-${statusMap[status] || status.toLowerCase()}`;
+    return `status-badge status-${
+      statusMap[agendamento.status] || agendamento.status.toLowerCase()
+    }`;
   };
 
   const formatDate = (dateString: string) => {
@@ -200,8 +219,8 @@ const AgendamentosPage: React.FC = () => {
             <div key={agendamento.id} className="agendamento-card">
               <div className="card-header">
                 <h3 className="servico-titulo">{agendamento.serviceType}</h3>
-                <span className={getStatusClass(agendamento.status)}>
-                  {getStatusLabel(agendamento.status)}
+                <span className={getStatusClass(agendamento)}>
+                  {getStatusLabel(agendamento)}
                 </span>
               </div>
 

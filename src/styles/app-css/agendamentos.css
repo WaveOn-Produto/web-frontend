@@ -175,6 +175,11 @@
   color: white;
 }
 
+.status-pending-payment {
+  background: #ff9800;
+  color: white;
+}
+
 .card-body {
   padding: 1.5rem;
 }
