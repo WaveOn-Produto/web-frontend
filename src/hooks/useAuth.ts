@@ -42,7 +42,7 @@ export function useAuth() {
     localStorage.removeItem("user");
     setToken(null);
     setUser(null);
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   const isAuthenticated = !!token && !!user;

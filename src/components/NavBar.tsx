@@ -1,48 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { FaStore, FaShoppingBag  } from "react-icons/fa";
-import { RiAccountCircleFill, RiLogoutBoxRLine } from "react-icons/ri";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { FaCalendarAlt, FaUser } from "react-icons/fa";
+import { RiLogoutBoxRLine } from "react-icons/ri";
+import { MdAdminPanelSettings } from "react-icons/md";
 
 interface NavBarProps {
   showNavLinks?: boolean;
+  logoVariant?: "dark" | "light";
 }
 
-export default function NavBar({ showNavLinks = true }: NavBarProps) {
-  const [logado, setLogado] = useState(false);
-
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      const token = typeof window !== "undefined"
-        ? localStorage.getItem("token")
-        : null;
-      setLogado(!!token);
-    };
-
-    checkLoginStatus();
-
-    window.addEventListener("storage", checkLoginStatus);
-
-    return () => {
-      window.removeEventListener("storage", checkLoginStatus);
-    };
-  }, []);
+export default function NavBar({
+  showNavLinks = true,
+  logoVariant = "dark",
+}: NavBarProps) {
+  const { isAuthenticated, logout, user } = useAuthContext();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setLogado(false);
-    window.dispatchEvent(new Event("storage"));
-    window.location.href = "/";
+    logout();
   };
 
   const getHeaderClass = () => {
     let classes = "header";
-    if (logado) classes += " logged";
+    if (isAuthenticated) classes += " logged";
     if (!showNavLinks) classes += " logo-only";
     return classes;
   };
+
+  const logoSrc =
+    logoVariant === "light"
+      ? "/images/id-visual/logo_claro.svg?variant=light"
+      : "/images/id-visual/logo_escuro.svg?variant=dark";
 
   return (
     <header className={getHeaderClass()}>
@@ -52,9 +41,13 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
             <span className="logo-text">WaveOn</span>
           ) : (
             <img
-              src="/images/id-visual/WaveOn.svg"
-              alt="Logo Stock.io"
+              src={logoSrc}
+              alt="Logo WaveOn"
               className="logo-img"
+              loading="eager"
+              width="150"
+              height="60"
+              key={logoSrc}
             />
           )}
         </div>
@@ -62,19 +55,37 @@ export default function NavBar({ showNavLinks = true }: NavBarProps) {
 
       {showNavLinks && (
         <nav className="nav-links">
-          {logado ? (
+          {isAuthenticated ? (
             <>
-              <Link href="/ver_mais" className="bag-icon" title="Ver Mais Produtos.">
-                <FaShoppingBag />
+              {user?.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="nav-link admin-link"
+                  title="Painel Admin"
+                >
+                  <MdAdminPanelSettings />
+                  <span>Painel Admin</span>
+                </Link>
+              )}
+              <Link
+                href="/agendamentos"
+                className="nav-link"
+                title="Meus Agendamentos"
+              >
+                <FaCalendarAlt />
+                <span>Agendamentos</span>
               </Link>
-              <Link href="/lojas" className="store-icon" title="Ver Mais Lojas.">
-                <FaStore />
+              <Link href="/perfil" className="nav-link" title="Meu Perfil">
+                <FaUser />
+                <span>Perfil</span>
               </Link>
-              <Link href="/perfil" className="perfil-icon" title="Ver Perfil.">
-                <RiAccountCircleFill />
-              </Link>
-              <button onClick={handleLogout} className="logout-btn" title="Deslogar">
+              <button
+                onClick={handleLogout}
+                className="logout-btn"
+                title="Sair"
+              >
                 <RiLogoutBoxRLine />
+                <span>Sair</span>
               </button>
             </>
           ) : (

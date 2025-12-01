@@ -4,9 +4,9 @@ export default function AboutSection() {
   return (
     <section className="about-section">
       <div className="about-container">
-        <h2 className="about-title">Sobre a WaveON</h2>
+        <h2 className="about-title">Sobre a VBLavagens</h2>
         <p className="about-description">
-          A WaveOn surgiu para atender a crescente demanda por cuidados automotivos modernos, oferecendo lavagem de veículos diretamente no endereço do cliente. Nosso compromisso é entregar uma experiência eficiente, segura e pensada para quem busca um serviço confiável e adaptado ao dia a dia, sem depender de deslocamentos ou espera em lojas tradicionais de lavagem.
+          A VBLavagens surgiu para atender a crescente demanda por cuidados automotivos modernos, oferecendo lavagem de veículos diretamente no endereço do cliente. Nosso compromisso é entregar uma experiência eficiente, segura e pensada para quem busca um serviço confiável e adaptado ao dia a dia, sem depender de deslocamentos ou espera em lojas tradicionais de lavagem.
         </p>
         
         <div className="about-features">

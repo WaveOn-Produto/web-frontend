@@ -1,64 +1,111 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Car } from "@/types/car";
 import { useRouter, useSearchParams } from "next/navigation";
-import LoginHeader from "@/components/LoginHeader";
+import NavBar from "@/components/NavBar";
 import LoginModal from "@/components/LoginModal";
+import Toast from "@/components/Toast";
 import { useAuth } from "@/hooks/useAuth";
+import apiClient from "@/services/api";
 import "@/styles/app-css/agendamento.css";
 import "@/styles/components-css/login-modal.css";
 
 export default function AgendamentoPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const servico = searchParams.get("servico") || "Lavagem Simples";
+
+  const servico = searchParams.get("servico") || "Lavagem simples";
   const preco = searchParams.get("preco") || "50,00";
-  
+
+  const servicoImage =
+    servico === "Lavagem completa"
+      ? "/images/services/detalhada2.png"
+      : "/images/services/detalhada1.PNG";
+
+  const descricaoServicos: { [key: string]: string } = {
+    "Lavagem simples":
+      "• Lavagem externa.<br /> • Limpeza Interna Simples.<br />• Limpeza Superficial de bancos.<br /> • Limpeza Simples de rodas, Pneus e Caixa de rodas. <br /> • Selante de Pneus.",
+    "Lavagem completa":
+      "• Lavagem Externa Detalhada. <br /> • Desincrustação de emblemas. <br /> • Limpeza Interna Detalhada.<br /> • Limpeza de Bancos detalhada. <br /> • Revitalização de Plasticos Internos <br/>e Externos 30 dias.<br /> • Selante de Pneus",
+  };
+
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [userCars, setUserCars] = useState<Car[]>([]);
+  const [categoryError, setCategoryError] = useState<string>("");
+
+  useEffect(() => {
+    const fetchUserCars = async () => {
+      if (!user) return;
+      try {
+        const response = await apiClient.get("/cars/my");
+
+        const cars = Array.isArray(response.data)
+          ? response.data.map((car: any) => ({
+              id: car.id,
+              marca: car.marca || car.brand,
+              modelo: car.modelo || car.model,
+              placa: car.placa || car.plate || car.licensePlate,
+              categoria: car.categoria || car.category || car.tipo || "",
+            }))
+          : [];
+        setUserCars(cars);
+      } catch (error) {
+        setUserCars([]);
+      }
+    };
+    fetchUserCars();
+  }, [user]);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentPrice, setCurrentPrice] = useState(preco);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const redirectPathRef = useRef<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "warning";
+  } | null>(null);
 
-  // Hook de autenticação
-  const { user, loading } = useAuth();
-
-  // Gerar calendário do mês completo
   const generateMonthCalendar = () => {
     const today = new Date();
     const year = currentYear;
     const month = currentMonth;
-    
-    // Primeiro dia do mês
+
     const firstDay = new Date(year, month, 1);
-    // Último dia do mês
     const lastDay = new Date(year, month + 1, 0);
-    
-    // Primeiro dia da semana (domingo = 0)
     const firstDayOfWeek = firstDay.getDay();
-    
+
     const days = [];
-    
-    // Adicionar dias vazios no início (do mês anterior)
+
     for (let i = 0; i < firstDayOfWeek; i++) {
       days.push(null);
     }
-    
-    // Adicionar todos os dias do mês
+
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
-      const fullDate = date.toISOString().split('T')[0];
-      const isToday = date.toDateString() === today.toDateString();
-      const isPast = date < today;
-      
-      // Calcular se está dentro dos próximos 7 dias disponíveis
-      const diffInDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      const isAvailable = !isPast && !isToday && diffInDays >= 1 && diffInDays <= 7;
-      
+      const fullDate = date.toISOString().split("T")[0];
+      const isToday =
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear();
+      const isPast =
+        date.getFullYear() < today.getFullYear() ||
+        (date.getFullYear() === today.getFullYear() &&
+          date.getMonth() < today.getMonth()) ||
+        (date.getFullYear() === today.getFullYear() &&
+          date.getMonth() === today.getMonth() &&
+          day < today.getDate());
+
+      const diffInDays = Math.ceil(
+        (date.setHours(0, 0, 0, 0) - today.setHours(0, 0, 0, 0)) /
+          (1000 * 60 * 60 * 24)
+      );
+      const isAvailable = !isPast && diffInDays >= 0 && diffInDays <= 7;
+
       days.push({
         day: day,
         month: month,
@@ -67,17 +114,19 @@ export default function AgendamentoPage() {
         isToday: isToday,
         isPast: isPast,
         isAvailable: isAvailable,
-        dayName: date.toLocaleDateString('pt-BR', { weekday: 'short' })
+        dayName: date.toLocaleDateString("pt-BR", { weekday: "short" }),
       });
     }
-    
+
     return {
       days,
-      monthName: firstDay.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      monthName: firstDay.toLocaleDateString("pt-BR", {
+        month: "long",
+        year: "numeric",
+      }),
     };
   };
 
-  // Navegar para mês anterior
   const goToPreviousMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -87,7 +136,6 @@ export default function AgendamentoPage() {
     }
   };
 
-  // Navegar para próximo mês
   const goToNextMonth = () => {
     if (currentMonth === 11) {
       setCurrentMonth(0);
@@ -97,150 +145,214 @@ export default function AgendamentoPage() {
     }
   };
 
-  // Verificar se deve mostrar botões de navegação
   const today = new Date();
-  const canGoPrevious = currentYear > today.getFullYear() || 
+  const canGoPrevious =
+    currentYear > today.getFullYear() ||
     (currentYear === today.getFullYear() && currentMonth > today.getMonth());
-  
-  // Permitir próximo mês se houver dias disponíveis nos próximos 7 dias
+
   const nextMonthDate = new Date(currentYear, currentMonth + 1, 1);
-  const diffToNextMonth = Math.ceil((nextMonthDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const diffToNextMonth = Math.ceil(
+    (nextMonthDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
   const canGoNext = diffToNextMonth <= 7;
 
-  // Simular horários disponíveis com regra de 4h entre lavagens
-  const getAvailableTimeSlots = (date: string) => {
-    const allSlots = ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
-    
-    // Simulação de agendamentos existentes (viria do backend)
-    // Para teste: apenas algumas datas específicas têm agendamentos
-    const existingBookings: { [key: string]: string[] } = {
-      "2025-11-29": ["09:00"], // Sexta-feira: 1 agendamento
-      "2025-11-30": ["14:00"], // Sábado: 1 agendamento
-      // Outras datas ficam totalmente livres para teste
-    };
-    
-    const bookedSlots = existingBookings[date] || [];
-    
-    // Se não há agendamentos, todos os horários estão disponíveis
-    if (bookedSlots.length === 0) {
-      return allSlots;
-    }
-    
-    // Aplicar regra de 4 horas entre lavagens apenas se houver agendamentos
-    const availableSlots = allSlots.filter(slot => {
-      if (bookedSlots.includes(slot)) {
-        return false; // Horário já ocupado
+  const getAvailableTimeSlots = async (date: string) => {
+    const allSlots = [
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+    ];
+
+    try {
+      const response = await apiClient.get(
+        `/appointments/available-slots?date=${date}`
+      );
+
+      const bookedSlots = response.data.bookedSlots || [];
+
+      
+      const now = new Date();
+      const selected = new Date(date + "T00:00:00");
+      let filteredSlots = allSlots;
+      if (
+        selected.getDate() === now.getDate() &&
+        selected.getMonth() === now.getMonth() &&
+        selected.getFullYear() === now.getFullYear()
+      ) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        filteredSlots = allSlots.filter((slot) => {
+          const slotMinutes = parseTime(slot);
+         
+          return slotMinutes > nowMinutes;
+        });
       }
-      
-      // Verificar se há conflito com regra de 4h
-      const currentTime = parseTime(slot);
-      
-      for (const bookedSlot of bookedSlots) {
-        const bookedTime = parseTime(bookedSlot);
-        const timeDiff = Math.abs(currentTime - bookedTime);
-        
-        // Se a diferença for menor que 4 horas (240 minutos), não disponível
-        if (timeDiff < 240) {
+
+      if (bookedSlots.length === 0) {
+        return filteredSlots;
+      }
+
+      const availableSlots = filteredSlots.filter((slot) => {
+        if (bookedSlots.includes(slot)) {
           return false;
         }
+
+        const currentTime = parseTime(slot);
+
+        for (const bookedSlot of bookedSlots) {
+          const bookedTime = parseTime(bookedSlot);
+          const timeDiff = Math.abs(currentTime - bookedTime);
+
+          if (timeDiff < 240) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      return availableSlots;
+    } catch (error) {
+      console.error("Erro ao buscar horários disponíveis:", error);
+
+      const now = new Date();
+      const selected = new Date(date + "T00:00:00");
+      if (
+        selected.getDate() === now.getDate() &&
+        selected.getMonth() === now.getMonth() &&
+        selected.getFullYear() === now.getFullYear()
+      ) {
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        return allSlots.filter((slot) => {
+          const slotMinutes = parseTime(slot);
+          return slotMinutes > nowMinutes;
+        });
       }
-      
-      return true;
-    });
-    
-    return availableSlots;
+      return allSlots;
+    }
   };
 
-  // Função auxiliar para converter horário em minutos
   const parseTime = (timeStr: string): number => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    const [hours, minutes] = timeStr.split(":").map(Number);
     return hours * 60 + minutes;
   };
 
-  // Atualizar horários disponíveis quando a data for selecionada
   useEffect(() => {
     if (selectedDate) {
-      const available = getAvailableTimeSlots(selectedDate);
-      setAvailableSlots(available);
-      setSelectedTime(""); // Reset time selection
+      getAvailableTimeSlots(selectedDate).then((available) => {
+        setAvailableSlots(available);
+        setSelectedTime("");
+      });
     }
   }, [selectedDate]);
 
-  const categories = [
-    "Hatch",
-    "Sedan",
-    "SUV",
-    "Pickup"
-  ];
+  const categories = ["Hatch", "Sedan", "SUV", "Caminhonete"];
 
-  const fetchPriceByCategory = async (category: string, serviceType: string) => {
-
-    const priceMap: { [key: string]: { [key: string]: string } } = {
-      "Lavagem Simples": {
-        "Hatch": "45,00",
-        "Sedan": "50,00",
-        "SUV": "60,00",
-        "Pickup": "65,00"
-      },
-      "Lavagem Completa": {
-        "Hatch": "70,00",
-        "Sedan": "80,00",
-        "SUV": "90,00",
-        "Pickup": "95,00"
-      }
-    };
-    
-    return priceMap[serviceType]?.[category] || preco;
+  const fetchPriceByCategory = async (
+    category: string,
+    serviceType: string
+  ) => {
+    try {
+      const response = await apiClient.get(
+        `/pricing/${encodeURIComponent(serviceType)}/${encodeURIComponent(
+          category
+        )}`
+      );
+      return response.data.price;
+    } catch (error) {
+      console.error("Erro ao buscar preço:", error);
+      return preco;
+    }
   };
 
-  // Atualizar preço quando categoria mudar
   const handleCategoryChange = async (category: string) => {
     setSelectedCategory(category);
-    
+    setCategoryError("");
+
+    if (!user) {
+      setCategoryError(
+        "Você precisa estar logado para agendar. Clique em Continuar para fazer login ou cadastro."
+      );
+      return;
+    }
+
     if (category) {
       const newPrice = await fetchPriceByCategory(category, servico);
       setCurrentPrice(newPrice);
+
+      const hasCar = userCars.some((car) => car.categoria === category);
+      if (!hasCar) {
+        setCategoryError(
+          `Você não possui um carro cadastrado do tipo ${category}. Cadastre um novo carro ou selecione outra categoria.`
+        );
+      }
     } else {
-      setCurrentPrice(preco); // Preço base
+      setCurrentPrice(preco);
+      setCategoryError("");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Verificar se usuário está logado
     if (!user) {
+      redirectPathRef.current =
+        window.location.pathname + window.location.search;
       setShowLoginModal(true);
       return;
     }
-    
     if (!selectedDate || !selectedTime || !selectedCategory) {
-      alert("Por favor, preencha todos os campos");
+      setToast({
+        message: "Por favor, preencha todos os campos",
+        type: "warning",
+      });
       return;
     }
 
-    // Aqui você pode implementar a lógica de agendamento
-    alert("Agendamento realizado com sucesso!");
-    router.push("/");
+    const params = new URLSearchParams({
+      servico,
+      data: selectedDate,
+      horario: selectedTime,
+      categoria: selectedCategory,
+      preco: currentPrice,
+    });
+    router.push(`/finalizacao?${params.toString()}`);
   };
+
+  useEffect(() => {
+    if (user && showLoginModal && redirectPathRef.current) {
+      router.push(redirectPathRef.current);
+      redirectPathRef.current = null;
+      setShowLoginModal(false);
+    }
+  }, [user, showLoginModal, router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      <LoginHeader />
-      
+      <NavBar />
+
       <div className="agendamento-container">
         <div className="agendamento-content">
-          {/* Informações do Serviço */}
           <div className="service-info">
             <div className="service-image-container">
-              <img 
-                src="/images/produtos/car-wash.jpg" 
-                alt={servico}
-                className="service-image"
-              />
+              <img src={servicoImage} alt={servico} className="service-image" />
             </div>
             <div className="service-details">
               <h2 className="service-title">{servico}</h2>
+              <p
+                className="service-description"
+                style={{
+                  margin: "8px 0",
+                  color: "#444",
+                  fontSize: "1rem",
+                  textAlign: "justify",
+                  lineHeight: 1.6,
+                }}
+                dangerouslySetInnerHTML={{ __html: descricaoServicos[servico] }}
+              />
               <div className="price-container">
                 {selectedCategory ? (
                   <p className="service-price-text">R$ {currentPrice}</p>
@@ -248,23 +360,19 @@ export default function AgendamentoPage() {
                   <p className="service-price-text">A Partir de R$ {preco}</p>
                 )}
                 <p className="service-note">
-                  {selectedCategory 
-                    ? `Preço para veículo ${selectedCategory}` 
-                    : "*Preço varia com base na categoria do veículo selecionado*"
-                  }
+                  {selectedCategory
+                    ? `Preço para veículo ${selectedCategory}`
+                    : "*Preço varia com base na categoria do veículo selecionado*"}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Formulário de Agendamento */}
           <div className="booking-form-container">
             <form onSubmit={handleSubmit} className="booking-form">
-              
-              {/* Calendário do mês completo */}
               <div className="form-section">
                 <div className="calendar-navigation">
-                  <button 
+                  <button
                     type="button"
                     onClick={goToPreviousMonth}
                     disabled={!canGoPrevious}
@@ -272,8 +380,10 @@ export default function AgendamentoPage() {
                   >
                     ←
                   </button>
-                  <h3 className="section-title">{generateMonthCalendar().monthName}</h3>
-                  <button 
+                  <h3 className="section-title">
+                    {generateMonthCalendar().monthName}
+                  </h3>
+                  <button
                     type="button"
                     onClick={goToNextMonth}
                     disabled={!canGoNext}
@@ -282,9 +392,10 @@ export default function AgendamentoPage() {
                     →
                   </button>
                 </div>
-                <p className="calendar-subtitle">Dias disponíveis nos próximos 7 dias</p>
-                
-                {/* Cabeçalho dos dias da semana */}
+                <p className="calendar-subtitle">
+                  Dias disponíveis nos próximos 7 dias
+                </p>
+
                 <div className="calendar-header">
                   <div className="day-header">Dom</div>
                   <div className="day-header">Seg</div>
@@ -294,8 +405,7 @@ export default function AgendamentoPage() {
                   <div className="day-header">Sex</div>
                   <div className="day-header">Sáb</div>
                 </div>
-                
-                {/* Grid do calendário */}
+
                 <div className="calendar-month-grid">
                   {generateMonthCalendar().days.map((dateObj, index) => (
                     <div key={index} className="calendar-day-container">
@@ -305,12 +415,20 @@ export default function AgendamentoPage() {
                           disabled={!dateObj.isAvailable}
                           className={`
                             calendar-month-day 
-                            ${dateObj.isToday ? 'today' : ''}
-                            ${dateObj.isPast ? 'past' : ''}
-                            ${!dateObj.isAvailable ? 'blocked' : 'available'}
-                            ${selectedDate === dateObj.fullDate ? 'selected' : ''}
+                            ${dateObj.isToday ? "today" : ""}
+                            ${dateObj.isPast ? "past" : ""}
+                            ${!dateObj.isAvailable ? "blocked" : "available"}
+                            ${
+                              selectedDate === dateObj.fullDate
+                                ? "selected"
+                                : ""
+                            }
                           `}
-                          onClick={() => dateObj.isAvailable ? setSelectedDate(dateObj.fullDate) : null}
+                          onClick={() =>
+                            dateObj.isAvailable
+                              ? setSelectedDate(dateObj.fullDate)
+                              : null
+                          }
                         >
                           {dateObj.day}
                         </button>
@@ -322,7 +440,6 @@ export default function AgendamentoPage() {
                 </div>
               </div>
 
-              {/* Horário - Baseado na data selecionada */}
               <div className="form-section">
                 <label className="section-label">Horário:</label>
                 {!selectedDate ? (
@@ -343,21 +460,23 @@ export default function AgendamentoPage() {
                         </option>
                       ))}
                     </select>
+
                     {availableSlots.length === 0 && (
                       <p className="time-rule-info">
-                        Nenhum horário disponível. Lembre-se: deve haver pelo menos 4 horas entre lavagens.
+                        Nenhum horário disponível. Lembre-se: deve haver pelo
+                        menos 4 horas entre lavagens.
                       </p>
                     )}
                     {availableSlots.length > 0 && availableSlots.length < 4 && (
                       <p className="time-rule-info">
-                        Poucos horários disponíveis devido à regra de 4 horas entre lavagens.
+                        Poucos horários disponíveis devido à regra de 4 horas
+                        entre lavagens.
                       </p>
                     )}
                   </>
                 )}
               </div>
 
-              {/* Categoria */}
               <div className="form-section">
                 <label className="section-label">Categoria:</label>
                 <select
@@ -374,20 +493,98 @@ export default function AgendamentoPage() {
                 </select>
               </div>
 
-              {/* Botão de Agendar */}
-              <button type="submit" className="agendar-button">
-                Agendar
+              {categoryError && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    margin: "12px 0 0 0",
+                    padding: "12px 18px",
+                    background: categoryError.includes("logado")
+                      ? "#fffbe6"
+                      : "#fff6f6",
+                    color: categoryError.includes("logado")
+                      ? "#eab308"
+                      : "#c62828",
+                    border: categoryError.includes("logado")
+                      ? "1px solid #fde68a"
+                      : "1px solid #f5c2c7",
+                    borderRadius: "8px",
+                    fontWeight: "500",
+                    fontSize: "0.75rem",
+                    fontFamily: "Inter, sans-serif",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    style={{ flexShrink: 0 }}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="12"
+                      fill={
+                        categoryError.includes("logado") ? "#fde68a" : "#f5c2c7"
+                      }
+                    />
+                    <path
+                      d="M12 7v5"
+                      stroke={
+                        categoryError.includes("logado") ? "#eab308" : "#c62828"
+                      }
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx="12"
+                      cy="16"
+                      r="1.2"
+                      fill={
+                        categoryError.includes("logado") ? "#eab308" : "#c62828"
+                      }
+                    />
+                  </svg>
+                  <span>{categoryError}</span>
+                </div>
+              )}
+              <button
+                type="submit"
+                className="agendar-button"
+                disabled={!!categoryError && !categoryError.includes("logado")}
+                onClick={(e) => {
+                  if (!user && categoryError.includes("logado")) {
+                    e.preventDefault();
+                    redirectPathRef.current =
+                      window.location.pathname + window.location.search;
+                    setShowLoginModal(true);
+                  }
+                }}
+              >
+                Continuar
               </button>
             </form>
           </div>
         </div>
       </div>
 
-      {/* Modal de Login */}
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
       />
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
