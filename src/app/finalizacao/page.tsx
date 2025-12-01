@@ -8,6 +8,7 @@ import apiClient from "@/services/api";
 import Toast from "@/components/Toast";
 import AlertInfo from "@/components/AlertInfo";
 import "@/styles/app-css/finalizacao.css";
+import CardFormInline, { CardFormData } from "@/components/CardFormInline";
 
 const FinalizacaoPage: React.FC = () => {
   const router = useRouter();
@@ -32,6 +33,8 @@ const FinalizacaoPage: React.FC = () => {
   } | null>(null);
   const [torneira, setTorneira] = useState(false);
   const [tomada, setTomada] = useState(false);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [cardToken, setCardToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -94,33 +97,67 @@ const FinalizacaoPage: React.FC = () => {
     }
 
     try {
+      // ================================
+      // 1️⃣ Criar o agendamento
+      // ================================
       const appointmentData = {
         serviceType: servico,
-        date: data, // formato: YYYY-MM-DD
-        time: horario, // formato: HH:MM
+        date: data,
+        time: horario,
         carId: selectedVehicle,
         addressId: selectedAddress,
         vehicleCategory: categoria,
       };
 
-      console.log("Enviando dados do agendamento:", appointmentData);
+      const appointmentResp = await apiClient.post("/appointments", appointmentData);
+      const appointmentId = appointmentResp.data.id;
 
-      await apiClient.post("/appointments", appointmentData);
+      // ================================
+      // 2️⃣ Pagamento PIX
+      // ================================
+      if (selectedPayment === "pix") {
+        const paymentResp = await apiClient.post("/payments/pix", {
+          appointmentId,
+          userId: user?.id,
+        });
 
-      setToast({
-        message: "Agendamento realizado com sucesso!",
-        type: "success",
-      });
+        const paymentId = paymentResp.data.paymentId;
 
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
+        // REDIRECIONAR PARA TELA DO QR CODE PIX
+        router.push(`/finalizacao/pix/${paymentId}`);
+        return;
+      }
+
+      // *** VALIDAR FORMULÁRIO DE CARTÃO ***
+      if (selectedPayment === "cartao" && !cardToken) {
+        setToast({
+          message: "Preencha os dados do cartão antes de finalizar!",
+          type: "warning",
+        });
+        return;
+      }
+
+      // ================================
+      // 3️⃣ Pagamento CARTÃO (mock)
+      // ================================
+      if (selectedPayment === "cartao") {
+        const paymentResp = await apiClient.post("/payments/card", {
+          appointmentId,
+          userId: user?.id,
+          token: cardToken,
+          installment: 1,
+        });
+
+        // REDIRECIONAR PARA TELA DE SUCESSO
+        router.push("/finalizacao/sucesso");
+        return;
+      }
+
     } catch (error: any) {
-      console.error("Erro ao criar agendamento:", error);
-      console.error("Resposta do erro:", error.response?.data);
+      console.error("Erro ao finalizar:", error);
       const errorMessage =
         error.response?.data?.message ||
-        "Erro ao criar agendamento. Tente novamente.";
+        "Erro ao finalizar agendamento. Tente novamente.";
       setToast({ message: errorMessage, type: "error" });
     }
   };
@@ -167,9 +204,8 @@ const FinalizacaoPage: React.FC = () => {
       </header>
 
       <div
-        className={`finalizacao-container ${
-          showPaymentCards ? "multiple-cards" : "single-card"
-        }`}
+        className={`finalizacao-container ${showPaymentCards ? "multiple-cards" : "single-card"
+          }`}
       >
         {/* Card 1: Verificar Informações */}
         <div className={`card ${showPaymentCards ? "first-card" : ""}`}>
@@ -216,8 +252,8 @@ const FinalizacaoPage: React.FC = () => {
                     (car.placa
                       ? " - " + car.placa
                       : car.licensePlate
-                      ? " - " + car.licensePlate
-                      : "")}
+                        ? " - " + car.licensePlate
+                        : "")}
                 </option>
               ))}
             </select>
@@ -279,9 +315,8 @@ const FinalizacaoPage: React.FC = () => {
             <h2 className="card-title">Selecionar método de pagamento</h2>
 
             <div
-              className={`payment-option ${
-                selectedPayment === "pix" ? "selected" : ""
-              }`}
+              className={`payment-option ${selectedPayment === "pix" ? "selected" : ""
+                }`}
               onClick={() => setSelectedPayment("pix")}
             >
               <div className="payment-icon pix-icon">
@@ -306,10 +341,13 @@ const FinalizacaoPage: React.FC = () => {
             </div>
 
             <div
-              className={`payment-option ${
-                selectedPayment === "cartao" ? "selected" : ""
-              }`}
-              onClick={() => setSelectedPayment("cartao")}
+              className={`payment-option ${selectedPayment === "cartao" ? "selected" : ""
+                }`}
+              onClick={() => {
+                setSelectedPayment("cartao");
+                setShowCardForm(true);
+              }}
+
             >
               <div className="payment-icon card-icon">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -339,7 +377,16 @@ const FinalizacaoPage: React.FC = () => {
                 <p className="payment-description">Pague usando seu cartão</p>
               </div>
             </div>
-
+            {selectedPayment === "cartao" && showCardForm && (
+              <CardFormInline
+                onSubmit={(data: CardFormData) => {
+                  setCardToken(data.token);
+                  setShowCardForm(false);
+                  setToast({ message: "Cartão validado!", type: "success" });
+                }}
+                onCancel={() => setShowCardForm(false)}
+              />
+            )}
             <button className="continuar-button">Continuar</button>
           </div>
         )}
