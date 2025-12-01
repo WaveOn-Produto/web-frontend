@@ -78,24 +78,43 @@ export default function PerfilPage() {
       ]);
 
       setCars(
-        carsResponse.data.map((car: any) => ({
-          id: car.id,
-          marca: car.brand,
-          modelo: car.model,
-          placa: car.plate || car.licensePlate,
-        }))
+        carsResponse.data.map(
+          (car: {
+            id: string;
+            brand?: string;
+            model?: string;
+            plate?: string;
+            licensePlate?: string;
+          }) => ({
+            id: car.id,
+            marca: car.brand,
+            modelo: car.model,
+            placa: car.plate || car.licensePlate,
+          })
+        )
       );
 
       setAddresses(
-        addressesResponse.data.map((addr: any) => ({
-          id: addr.id,
-          rua: addr.street,
-          numero: addr.number,
-          bairro: addr.district || addr.neighborhood,
-          cidade: addr.city,
-          estado: addr.state || "",
-          cep: addr.cep,
-        }))
+        addressesResponse.data.map(
+          (addr: {
+            id: string;
+            street?: string;
+            number?: string;
+            district?: string;
+            neighborhood?: string;
+            city?: string;
+            state?: string;
+            cep?: string;
+          }) => ({
+            id: addr.id,
+            rua: addr.street,
+            numero: addr.number,
+            bairro: addr.district || addr.neighborhood,
+            cidade: addr.city,
+            estado: addr.state || "",
+            cep: addr.cep,
+          })
+        )
       );
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
@@ -133,7 +152,12 @@ export default function PerfilPage() {
     setToast({ message: "Funcionalidade em desenvolvimento", type: "warning" });
   };
 
-  const handleAddCar = async (carData: any) => {
+  const handleAddCar = async (carData: {
+    brand?: string;
+    model?: string;
+    plate?: string;
+    licensePlate?: string;
+  }) => {
     try {
       const response = await apiClient.post("/cars", carData);
 
@@ -147,16 +171,24 @@ export default function PerfilPage() {
       setCars([...cars, newCar]);
       setShowCarModal(false);
       setToast({ message: "Veículo adicionado com sucesso!", type: "success" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao adicionar veículo:", error);
+      const err = error as { response?: { data?: { message?: string } } };
       setToast({
-        message: error.response?.data?.message || "Erro ao adicionar veículo",
+        message: err.response?.data?.message || "Erro ao adicionar veículo",
         type: "error",
       });
     }
   };
 
-  const handleAddAddress = async (addressData: any) => {
+  const handleAddAddress = async (addressData: {
+    cep?: string;
+    rua?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+  }) => {
     try {
       const response = await apiClient.post("/addresses", {
         cep: addressData.cep,
@@ -183,10 +215,11 @@ export default function PerfilPage() {
         message: "Endereço adicionado com sucesso!",
         type: "success",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao adicionar endereço:", error);
+      const err = error as { response?: { data?: { message?: string } } };
       setToast({
-        message: error.response?.data?.message || "Erro ao adicionar endereço",
+        message: err.response?.data?.message || "Erro ao adicionar endereço",
         type: "error",
       });
     }

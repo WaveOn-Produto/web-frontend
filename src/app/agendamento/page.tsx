@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { Car } from "@/types/car";
 import { useRouter, useSearchParams } from "next/navigation";
 import NavBar from "@/components/NavBar";
@@ -11,7 +11,7 @@ import apiClient from "@/services/api";
 import "@/styles/app-css/agendamento.css";
 import "@/styles/components-css/login-modal.css";
 
-export default function AgendamentoPage() {
+function AgendamentoContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,13 +44,27 @@ export default function AgendamentoPage() {
         const response = await apiClient.get("/cars/my");
 
         const cars = Array.isArray(response.data)
-          ? response.data.map((car: any) => ({
-              id: car.id,
-              marca: car.marca || car.brand,
-              modelo: car.modelo || car.model,
-              placa: car.placa || car.plate || car.licensePlate,
-              categoria: car.categoria || car.category || car.tipo || "",
-            }))
+          ? response.data.map(
+              (car: {
+                id: string;
+                marca?: string;
+                brand?: string;
+                modelo?: string;
+                model?: string;
+                placa?: string;
+                plate?: string;
+                licensePlate?: string;
+                categoria?: string;
+                category?: string;
+                tipo?: string;
+              }) => ({
+                id: car.id,
+                marca: car.marca || car.brand || "",
+                modelo: car.modelo || car.model || "",
+                placa: car.placa || car.plate || car.licensePlate || "",
+                categoria: car.categoria || car.category || car.tipo || "",
+              })
+            )
           : [];
         setUserCars(cars);
       } catch (error) {
@@ -175,7 +189,6 @@ export default function AgendamentoPage() {
 
       const bookedSlots = response.data.bookedSlots || [];
 
-      
       const now = new Date();
       const selected = new Date(date + "T00:00:00");
       let filteredSlots = allSlots;
@@ -187,7 +200,7 @@ export default function AgendamentoPage() {
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
         filteredSlots = allSlots.filter((slot) => {
           const slotMinutes = parseTime(slot);
-         
+
           return slotMinutes > nowMinutes;
         });
       }
@@ -586,5 +599,13 @@ export default function AgendamentoPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function AgendamentoPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <AgendamentoContent />
+    </Suspense>
   );
 }

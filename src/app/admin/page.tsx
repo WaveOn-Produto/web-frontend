@@ -20,26 +20,26 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        
         const res = await apiClient.get("/appointments/admin/all");
         const appointments = res.data;
 
         // Calcula indicadores
         const today = new Date().toISOString().slice(0, 10);
         const agendamentosHoje = appointments.filter(
-          (a: any) => a.date?.slice(0, 10) === today
+          (a: { date?: string }) => a.date?.slice(0, 10) === today
         );
         const pendentes = appointments.filter(
-          (a: any) => a.status === "SCHEDULED"
+          (a: { status?: string }) => a.status === "SCHEDULED"
         );
         const concluidosMes = appointments.filter(
-          (a: any) =>
+          (a: { status?: string; date?: string }) =>
             a.status === "COMPLETED" &&
             a.date?.slice(0, 7) === today.slice(0, 7)
         );
-        
+
         const receitaMes = concluidosMes.reduce(
-          (acc: number, a: any) => acc + (a.priceCents || 0) / 100,
+          (acc: number, a: { priceCents?: number }) =>
+            acc + (a.priceCents || 0) / 100,
           0
         );
 
@@ -73,10 +73,9 @@ export default function AdminDashboard() {
           },
         ]);
 
-        
         setRecentAppointments(agendamentosHoje);
-      } catch (err) {
-      
+      } catch {
+        // Erro ao buscar dados do dashboard
       } finally {
         setLoading(false);
       }
@@ -137,37 +136,48 @@ export default function AdminDashboard() {
                     <td colSpan={5}>Nenhum agendamento hoje.</td>
                   </tr>
                 ) : (
-                  recentAppointments.map((appointment: any) => (
-                    <tr key={appointment.id}>
-                      <td>{appointment.user?.name || "-"}</td>
-                      <td>
-                        {appointment.serviceType ||
-                          appointment.serviceName ||
-                          appointment.service ||
-                          "-"}
-                      </td>
-                      <td>
-                        {appointment.time ||
-                          appointment.date?.slice(11, 16) ||
-                          "-"}
-                      </td>
-                      <td>
-                        <span
-                          className={`badge badge-${appointment.status?.toLowerCase()}`}
-                        >
-                          {appointment.status === "SCHEDULED"
-                            ? "Agendado"
-                            : appointment.status === "COMPLETED"
-                            ? "Concluído"
-                            : appointment.status}
-                        </span>
-                      </td>
-                      <td>
-                        <button className="btn-icon">👁️</button>
-                        <button className="btn-icon">✏️</button>
-                      </td>
-                    </tr>
-                  ))
+                  recentAppointments.map(
+                    (appointment: {
+                      id: string;
+                      user?: { name?: string };
+                      serviceType?: string;
+                      serviceName?: string;
+                      service?: string;
+                      time?: string;
+                      date?: string;
+                      status?: string;
+                    }) => (
+                      <tr key={appointment.id}>
+                        <td>{appointment.user?.name || "-"}</td>
+                        <td>
+                          {appointment.serviceType ||
+                            appointment.serviceName ||
+                            appointment.service ||
+                            "-"}
+                        </td>
+                        <td>
+                          {appointment.time ||
+                            appointment.date?.slice(11, 16) ||
+                            "-"}
+                        </td>
+                        <td>
+                          <span
+                            className={`badge badge-${appointment.status?.toLowerCase()}`}
+                          >
+                            {appointment.status === "SCHEDULED"
+                              ? "Agendado"
+                              : appointment.status === "COMPLETED"
+                              ? "Concluído"
+                              : appointment.status}
+                          </span>
+                        </td>
+                        <td>
+                          <button className="btn-icon">👁️</button>
+                          <button className="btn-icon">✏️</button>
+                        </td>
+                      </tr>
+                    )
+                  )
                 )}
               </tbody>
             </table>

@@ -14,7 +14,10 @@ export default function PixPaymentPage() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
   const [status, setStatus] = useState("PENDING");
-  const [toast, setToast] = useState<any>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "info" | "warning";
+  } | null>(null);
 
   // Buscar pagamento PIX
   useEffect(() => {

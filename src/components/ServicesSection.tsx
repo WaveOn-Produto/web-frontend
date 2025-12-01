@@ -18,11 +18,16 @@ export default function ServicesSection() {
 
         // Calcula o menor preço para cada serviço
         const lavSimples = pricings
-          .filter((p: any) => p.serviceType === "Lavagem simples")
-          .map((p: any) => p.priceCents / 100);
-        const lavCompleta = pricings
-          .filter((p: any) => p.serviceType === "Lavagem completa")
-          .map((p: any) => p.priceCents / 100);
+          .filter(
+            (p: { serviceType?: string }) => p.serviceType === "Lavagem simples"
+          )
+          .map((p: { priceCents?: number }) => (p.priceCents || 0) / 100);
+        const precosCompleta = pricings
+          .filter(
+            (p: { serviceType?: string }) =>
+              p.serviceType === "Lavagem completa"
+          )
+          .map((p: { priceCents?: number }) => (p.priceCents || 0) / 100);
 
         if (lavSimples.length > 0) {
           const minSimples = Math.min(...lavSimples);
@@ -32,8 +37,8 @@ export default function ServicesSection() {
           }));
         }
 
-        if (lavCompleta.length > 0) {
-          const minCompleta = Math.min(...lavCompleta);
+        if (precosCompleta.length > 0) {
+          const minCompleta = Math.min(...precosCompleta);
           setMinPrices((prev) => ({
             ...prev,
             "Lavagem completa": minCompleta.toFixed(2).replace(".", ","),

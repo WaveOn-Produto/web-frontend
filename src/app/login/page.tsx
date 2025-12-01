@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import apiClient from "@/services/api";
 import { LoginResponse } from "@/types/auth";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 
-const LoginPage: React.FC = () => {
+const LoginContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuthContext();
@@ -71,10 +71,13 @@ const LoginPage: React.FC = () => {
           window.location.href = "/";
         }
       }, 1000);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { status?: number; data?: { message?: string } };
+      };
       const errorMessage =
-        error.response?.data?.message || "Erro ao realizar login.";
-      if (error.response?.status === 401) {
+        err.response?.data?.message || "Erro ao realizar login.";
+      if (err.response?.status === 401) {
         setServerError("Email ou senha incorretos.");
       } else {
         setServerError(errorMessage);
@@ -167,6 +170,14 @@ const LoginPage: React.FC = () => {
         </section>
       </main>
     </>
+  );
+};
+
+const LoginPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 };
 

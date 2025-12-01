@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +19,7 @@ import {
   FaQuestionCircle,
 } from "react-icons/fa";
 
-const RegisterPage: React.FC = () => {
+const RegisterContent: React.FC = () => {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const { login } = useAuth();
@@ -157,7 +157,7 @@ const RegisterPage: React.FC = () => {
               category: car.category,
             };
             await apiClient.post("/cars", carPayload, config);
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error("Erro ao salvar carro:", error);
             setServerError("Erro ao salvar carro. Por favor, tente novamente.");
           }
@@ -174,7 +174,7 @@ const RegisterPage: React.FC = () => {
               city: address.cidade,
             };
             await apiClient.post("/addresses", addressPayload, config);
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error("Erro ao salvar endereço:", error);
             setServerError(
               "Erro ao salvar endereço. Por favor, tente novamente."
@@ -202,11 +202,14 @@ const RegisterPage: React.FC = () => {
           window.location.href = "/";
         }
       }, 1500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro no cadastro:", error);
-      console.error("Detalhes do erro:", error.response?.data);
+      const err = error as {
+        response?: { data?: { message?: string | string[] } };
+      };
+      console.error("Detalhes do erro:", err.response?.data);
       const errorMessage =
-        error.response?.data?.message || "Erro ao criar conta.";
+        err.response?.data?.message || "Erro ao criar conta.";
       if (Array.isArray(errorMessage)) {
         setServerError(errorMessage.join(", "));
       } else {
@@ -428,6 +431,14 @@ const RegisterPage: React.FC = () => {
         onSave={handleSaveAddress}
       />
     </div>
+  );
+};
+
+const RegisterPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 };
 
