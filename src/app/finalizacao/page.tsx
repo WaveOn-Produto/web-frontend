@@ -8,7 +8,7 @@ import apiClient from "@/services/api";
 import Toast from "@/components/Toast";
 import AlertInfo from "@/components/AlertInfo";
 import "@/styles/app-css/finalizacao.css";
-import CardForm from "@/components/CardForm";
+import CardFormInline, { CardFormData } from "@/components/CardFormInline";
 
 const FinalizacaoPage: React.FC = () => {
   const router = useRouter();
@@ -162,18 +162,6 @@ const FinalizacaoPage: React.FC = () => {
       setToast({ message: errorMessage, type: "error" });
     }
   };
-  {
-    showCardForm && (
-      <CardForm
-        onSubmit={(data) => {
-          setCardToken(data.token);
-          setShowCardForm(false);
-          setToast({ message: "Cartão validado!", type: "success" });
-        }}
-        onCancel={() => setShowCardForm(false)}
-      />
-    )
-  }
 
   return (
     <div className="finalizacao-page">
@@ -387,7 +375,16 @@ const FinalizacaoPage: React.FC = () => {
                 <p className="payment-description">Pague usando seu cartão</p>
               </div>
             </div>
-
+            {selectedPayment === "cartao" && showCardForm && (
+              <CardFormInline
+                onSubmit={(data: CardFormData) => {
+                  setCardToken(data.token);
+                  setShowCardForm(false);
+                  setToast({ message: "Cartão validado!", type: "success" });
+                }}
+                onCancel={() => setShowCardForm(false)}
+              />
+            )}
             <button className="continuar-button">Continuar</button>
           </div>
         )}
