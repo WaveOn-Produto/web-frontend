@@ -36,13 +36,13 @@ export default function AgendamentoPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [userCars, setUserCars] = useState<Car[]>([]);
   const [categoryError, setCategoryError] = useState<string>("");
-  
+
   useEffect(() => {
     const fetchUserCars = async () => {
       if (!user) return;
       try {
         const response = await apiClient.get("/cars/my");
-        
+
         const cars = Array.isArray(response.data)
           ? response.data.map((car: any) => ({
               id: car.id,
@@ -197,14 +197,12 @@ export default function AgendamentoPage() {
       }
 
       const availableSlots = filteredSlots.filter((slot) => {
-        
         if (bookedSlots.includes(slot)) {
           return false;
         }
 
         const currentTime = parseTime(slot);
 
-   
         for (const bookedSlot of bookedSlots) {
           const bookedTime = parseTime(bookedSlot);
           const timeDiff = Math.abs(currentTime - bookedTime);
@@ -220,7 +218,7 @@ export default function AgendamentoPage() {
       return availableSlots;
     } catch (error) {
       console.error("Erro ao buscar horários disponíveis:", error);
-      
+
       const now = new Date();
       const selected = new Date(date + "T00:00:00");
       if (
@@ -258,22 +256,17 @@ export default function AgendamentoPage() {
     category: string,
     serviceType: string
   ) => {
-    const priceMap: { [key: string]: { [key: string]: string } } = {
-      "Lavagem simples": {
-        Hatch: "80,00",
-        Sedan: "90,00",
-        SUV: "95,00",
-        Caminhonete: "120,00",
-      },
-      "Lavagem completa": {
-        Hatch: "100,00",
-        Sedan: "110,00",
-        SUV: "115,00",
-        Caminhonete: "150,00",
-      },
-    };
-
-    return priceMap[serviceType]?.[category] || preco;
+    try {
+      const response = await apiClient.get(
+        `/pricing/${encodeURIComponent(serviceType)}/${encodeURIComponent(
+          category
+        )}`
+      );
+      return response.data.price;
+    } catch (error) {
+      console.error("Erro ao buscar preço:", error);
+      return preco;
+    }
   };
 
   const handleCategoryChange = async (category: string) => {
@@ -291,7 +284,6 @@ export default function AgendamentoPage() {
       const newPrice = await fetchPriceByCategory(category, servico);
       setCurrentPrice(newPrice);
 
-    
       const hasCar = userCars.some((car) => car.categoria === category);
       if (!hasCar) {
         setCategoryError(
@@ -319,7 +311,7 @@ export default function AgendamentoPage() {
       });
       return;
     }
-   
+
     const params = new URLSearchParams({
       servico,
       data: selectedDate,
@@ -329,7 +321,7 @@ export default function AgendamentoPage() {
     });
     router.push(`/finalizacao?${params.toString()}`);
   };
-  
+
   useEffect(() => {
     if (user && showLoginModal && redirectPathRef.current) {
       router.push(redirectPathRef.current);
@@ -468,7 +460,7 @@ export default function AgendamentoPage() {
                         </option>
                       ))}
                     </select>
-                    
+
                     {availableSlots.length === 0 && (
                       <p className="time-rule-info">
                         Nenhum horário disponível. Lembre-se: deve haver pelo
