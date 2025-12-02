@@ -170,7 +170,8 @@ export default function AdminAgendamentos() {
       fetchAppointments();
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
-      alert("❌ Erro ao cancelar agendamento. Verifique permissões ou tente novamente.");
+      alert(
+        "❌ Erro ao cancelar agendamento. Verifique permissões ou tente novamente."
       );
     }
   };
@@ -182,7 +183,9 @@ export default function AdminAgendamentos() {
       fetchAppointments();
     } catch (error) {
       console.error("Erro ao concluir agendamento:", error);
-      alert("❌ Erro ao concluir agendamento. Verifique permissões ou tente novamente.");
+      alert(
+        "❌ Erro ao concluir agendamento. Verifique permissões ou tente novamente."
+      );
     }
   };
 
@@ -500,9 +503,7 @@ export default function AdminAgendamentos() {
                 )}
               </div>
 
-              <div
-                className="modal-actions"
-              >
+              <div className="modal-actions">
                 <button
                   className="btn-secondary"
                   onClick={() => setShowModal(false)}
