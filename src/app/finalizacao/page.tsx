@@ -195,7 +195,9 @@ const FinalizacaoContent: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error("❌ Erro ao finalizar:", error);
-      const err = error as { response?: { data?: any; status?: number } };
+      const err = error as {
+        response?: { data?: { message?: string }; status?: number };
+      };
       console.error("📋 Detalhes do erro:", {
         status: err.response?.status,
         data: err.response?.data,
