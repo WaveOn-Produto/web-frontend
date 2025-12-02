@@ -76,7 +76,7 @@ export default function AdminAgendamentos() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get("/appointments/admin/all");
+      const response = await apiClient.get("/api/appointments/admin/all");
       setAppointments(response.data);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
@@ -130,7 +130,7 @@ export default function AdminAgendamentos() {
 
     try {
       await apiClient.patch(
-        `/appointments/${selectedAppointment.id}/observations`,
+        `/api/appointments/${selectedAppointment.id}/observations`,
         { observations: observacoes }
       );
       alert("Observação salva com sucesso!");
@@ -144,7 +144,7 @@ export default function AdminAgendamentos() {
 
   const handleCancelAppointment = async (id: number) => {
     try {
-      await apiClient.patch(`/appointments/${id}/cancel`);
+      await apiClient.patch(`/api/appointments/${id}/cancel`);
       alert("🚫 Agendamento cancelado com sucesso!");
       fetchAppointments();
     } catch (error) {
@@ -157,7 +157,7 @@ export default function AdminAgendamentos() {
 
   const handleCompleteAppointment = async (id: number) => {
     try {
-      await apiClient.patch(`/appointments/${id}/complete`);
+      await apiClient.patch(`/api/appointments/${id}/complete`);
       alert("✅ Agendamento concluído com sucesso!");
       fetchAppointments();
     } catch (error) {
