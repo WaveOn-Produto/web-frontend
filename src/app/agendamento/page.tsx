@@ -270,14 +270,18 @@ function AgendamentoContent() {
     serviceType: string
   ) => {
     try {
-      const response = await apiClient.get(
-        `/pricing/${encodeURIComponent(serviceType)}/${encodeURIComponent(
-          category
-        )}`
-      );
+      console.log("🔍 Buscando preço:", { serviceType, category });
+      const url = `/pricing/${encodeURIComponent(
+        serviceType
+      )}/${encodeURIComponent(category)}`;
+      console.log("📍 URL:", url);
+
+      const response = await apiClient.get(url);
+      console.log("✅ Preço encontrado:", response.data);
       return response.data.price;
     } catch (error) {
-      console.error("Erro ao buscar preço:", error);
+      console.error("❌ Erro ao buscar preço:", error);
+      console.log("⚠️ Usando preço padrão:", preco);
       return preco;
     }
   };

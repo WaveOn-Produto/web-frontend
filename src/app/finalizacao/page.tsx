@@ -131,10 +131,13 @@ const FinalizacaoContent: React.FC = () => {
         vehicleCategory: categoria,
       };
 
+      console.log("📝 Dados do agendamento:", appointmentData);
+
       const appointmentResp = await apiClient.post(
         "/appointments",
         appointmentData
       );
+      console.log("✅ Agendamento criado:", appointmentResp.data);
       const appointmentId = appointmentResp.data.id;
 
       // ================================
