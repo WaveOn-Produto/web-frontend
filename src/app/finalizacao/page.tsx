@@ -139,6 +139,22 @@ const FinalizacaoContent: React.FC = () => {
       };
 
       console.log("📝 Dados do agendamento:", appointmentData);
+      console.log("🔍 Debug serviceType:", {
+        value: servico,
+        length: servico.length,
+        chars: servico
+          .split("")
+          .map((c) => `${c}(${c.charCodeAt(0)})`)
+          .join(","),
+      });
+      console.log("🔍 Debug vehicleCategory:", {
+        value: vehicleCategory,
+        length: vehicleCategory?.length,
+        chars: vehicleCategory
+          ?.split("")
+          .map((c) => `${c}(${c.charCodeAt(0)})`)
+          .join(","),
+      });
 
       const appointmentResp = await apiClient.post(
         "/appointments",
