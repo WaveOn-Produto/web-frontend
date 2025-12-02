@@ -22,7 +22,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Interceptor para lidar com erros de autenticação
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -34,8 +34,7 @@ apiClient.interceptors.response.use(
           currentPath.includes("/login") ||
           currentPath.includes("/cadastro");
 
-        // Só limpa localStorage e redireciona se for uma rota pública
-        // Para rotas protegidas, deixa o componente lidar com o erro
+
         if (isPublicRoute) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");

@@ -253,7 +253,10 @@ const FinalizacaoContent: React.FC = () => {
             <select
               className="info-select"
               value={selectedAddress}
-              onChange={(e) => setSelectedAddress(e.target.value)}
+              onChange={(e) => {
+                console.log("🏡 Endereço selecionado:", e.target.value);
+                setSelectedAddress(e.target.value);
+              }}
             >
               <option value="">Selecionar</option>
               {userAddresses.map((address) => (
@@ -278,7 +281,10 @@ const FinalizacaoContent: React.FC = () => {
             <select
               className="info-select"
               value={selectedVehicle}
-              onChange={(e) => setSelectedVehicle(e.target.value)}
+              onChange={(e) => {
+                console.log("🚘 Veículo selecionado:", e.target.value);
+                setSelectedVehicle(e.target.value);
+              }}
             >
               <option value="">Selecionar</option>
               {userCars.map((car) => (
