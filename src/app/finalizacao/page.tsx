@@ -71,12 +71,9 @@ const FinalizacaoContent: React.FC = () => {
             apiClient.get("/cars/my"),
             apiClient.get("/addresses/my"),
           ]);
-          console.log("🚗 Carros carregados:", carsResponse.data);
-          console.log("🏠 Endereços carregados:", addressesResponse.data);
           setUserCars(carsResponse.data);
           setUserAddresses(addressesResponse.data);
         } catch (error: unknown) {
-          console.error("Erro ao carregar dados:", error);
           const err = error as { response?: { status?: number } };
           // Só mostra erro se não for 401
           if (err.response?.status !== 401) {
@@ -138,29 +135,10 @@ const FinalizacaoContent: React.FC = () => {
         vehicleCategory: vehicleCategory,
       };
 
-      console.log("📝 Dados do agendamento:", appointmentData);
-      console.log("🔍 Debug serviceType:", {
-        value: servico,
-        length: servico.length,
-        chars: servico
-          .split("")
-          .map((c) => `${c}(${c.charCodeAt(0)})`)
-          .join(","),
-      });
-      console.log("🔍 Debug vehicleCategory:", {
-        value: vehicleCategory,
-        length: vehicleCategory?.length,
-        chars: vehicleCategory
-          ?.split("")
-          .map((c) => `${c}(${c.charCodeAt(0)})`)
-          .join(","),
-      });
-
       const appointmentResp = await apiClient.post(
         "/appointments",
         appointmentData
       );
-      console.log("✅ Agendamento criado:", appointmentResp.data);
       const appointmentId = appointmentResp.data.id;
 
       // ================================
@@ -210,15 +188,9 @@ const FinalizacaoContent: React.FC = () => {
         return;
       }
     } catch (error: unknown) {
-      console.error("❌ Erro ao finalizar:", error);
       const err = error as {
         response?: { data?: { message?: string }; status?: number };
       };
-      console.error("📋 Detalhes do erro:", {
-        status: err.response?.status,
-        data: err.response?.data,
-        message: err.response?.data?.message,
-      });
 
       const errorMessage =
         err.response?.data?.message ||
@@ -282,10 +254,7 @@ const FinalizacaoContent: React.FC = () => {
             <select
               className="info-select"
               value={selectedAddress}
-              onChange={(e) => {
-                console.log("🏡 Endereço selecionado:", e.target.value);
-                setSelectedAddress(e.target.value);
-              }}
+              onChange={(e) => setSelectedAddress(e.target.value)}
             >
               <option value="">Selecionar</option>
               {userAddresses.map((address) => (
@@ -310,10 +279,7 @@ const FinalizacaoContent: React.FC = () => {
             <select
               className="info-select"
               value={selectedVehicle}
-              onChange={(e) => {
-                console.log("🚘 Veículo selecionado:", e.target.value);
-                setSelectedVehicle(e.target.value);
-              }}
+              onChange={(e) => setSelectedVehicle(e.target.value)}
             >
               <option value="">Selecionar</option>
               {userCars.map((car) => (
