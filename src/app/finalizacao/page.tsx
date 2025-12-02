@@ -194,8 +194,14 @@ const FinalizacaoContent: React.FC = () => {
         return;
       }
     } catch (error: unknown) {
-      console.error("Erro ao finalizar:", error);
-      const err = error as { response?: { data?: { message?: string } } };
+      console.error("❌ Erro ao finalizar:", error);
+      const err = error as { response?: { data?: any; status?: number } };
+      console.error("📋 Detalhes do erro:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.response?.data?.message,
+      });
+
       const errorMessage =
         err.response?.data?.message ||
         "Erro ao finalizar agendamento. Tente novamente.";
