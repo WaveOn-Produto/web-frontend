@@ -58,15 +58,6 @@ export default function AdminAgendamentos() {
   const [showModal, setShowModal] = useState(false);
   const [showObsModal, setShowObsModal] = useState(false);
   const [observacoes, setObservacoes] = useState("");
-  const [toast, setToast] = useState<{
-    show: boolean;
-    message: string;
-    type: "success" | "error";
-  }>({
-    show: false,
-    message: "",
-    type: "success",
-  });
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -94,7 +85,7 @@ export default function AdminAgendamentos() {
         setAvailableTimeSlots(response.data.availableSlots);
       } catch (error) {
         console.error("Erro ao carregar horários disponíveis:", error);
-        showToast("Erro ao carregar horários disponíveis", "error");
+        alert("Erro ao carregar horários disponíveis");
       }
     };
 
@@ -110,17 +101,10 @@ export default function AdminAgendamentos() {
       setAppointments(response.data);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
-      showToast("Erro ao carregar agendamentos", "error");
+      alert("Erro ao carregar agendamentos");
     } finally {
       setLoading(false);
     }
-  };
-
-  const showToast = (message: string, type: "success" | "error") => {
-    setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast({ show: false, message: "", type: "success" });
-    }, 3000);
   };
 
   const getStatusLabel = (status: string) => {
@@ -170,25 +154,23 @@ export default function AdminAgendamentos() {
         `/appointments/${selectedAppointment.id}/observations`,
         { observations: observacoes }
       );
-      showToast("Observação salva com sucesso!", "success");
+      alert("Observação salva com sucesso!");
       setShowObsModal(false);
       fetchAppointments();
     } catch (error) {
       console.error("Erro ao salvar observação:", error);
-      showToast("Erro ao salvar observação", "error");
+      alert("Erro ao salvar observação");
     }
   };
 
   const handleCancelAppointment = async (id: number) => {
     try {
       await apiClient.patch(`/appointments/${id}/cancel`);
-      showToast("🚫 Agendamento cancelado com sucesso!", "success");
+      alert("🚫 Agendamento cancelado com sucesso!");
       fetchAppointments();
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
-      showToast(
-        "❌ Erro ao cancelar agendamento. Verifique permissões ou tente novamente.",
-        "error"
+      alert("❌ Erro ao cancelar agendamento. Verifique permissões ou tente novamente.");
       );
     }
   };
@@ -196,14 +178,11 @@ export default function AdminAgendamentos() {
   const handleCompleteAppointment = async (id: number) => {
     try {
       await apiClient.patch(`/appointments/${id}/complete`);
-      showToast("✅ Agendamento concluído com sucesso!", "success");
+      alert("✅ Agendamento concluído com sucesso!");
       fetchAppointments();
     } catch (error) {
       console.error("Erro ao concluir agendamento:", error);
-      showToast(
-        "❌ Erro ao concluir agendamento. Verifique permissões ou tente novamente.",
-        "error"
-      );
+      alert("❌ Erro ao concluir agendamento. Verifique permissões ou tente novamente.");
     }
   };
 
@@ -213,11 +192,11 @@ export default function AdminAgendamentos() {
       setAvailableTimeSlots((prev) =>
         prev.filter((timeSlot) => timeSlot !== selectedTimeSlot)
       );
-      showToast("✅ Horário marcado com sucesso!", "success");
+      alert("✅ Horário marcado com sucesso!");
       fetchAppointments();
     } catch (error) {
       console.error("Erro ao marcar horário:", error);
-      showToast("❌ Erro ao marcar horário. Tente novamente.", "error");
+      alert("❌ Erro ao marcar horário. Tente novamente.");
     }
   };
 
@@ -523,19 +502,9 @@ export default function AdminAgendamentos() {
 
               <div
                 className="modal-actions"
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  marginTop: 24,
-                }}
               >
                 <button
                   className="btn-secondary"
-                  style={{
-                    minWidth: 100,
-                    padding: "8px 20px",
-                    borderRadius: 6,
-                  }}
                   onClick={() => setShowModal(false)}
                 >
                   Fechar
@@ -574,49 +543,6 @@ export default function AdminAgendamentos() {
                 </button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Toast Notification */}
-        {toast.show && (
-          <div
-            className={`toast toast-${toast.type}`}
-            style={{
-              position: "fixed",
-              top: "32px",
-              right: "32px",
-              zIndex: 9999,
-              minWidth: "260px",
-              padding: "16px 24px",
-              borderRadius: "10px",
-              fontWeight: 500,
-              fontSize: "1rem",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-              color:
-                toast.type === "success" && toast.message.includes("cancelado")
-                  ? "#b45309"
-                  : toast.type === "success"
-                  ? "#065f46"
-                  : "#991b1b",
-              background:
-                toast.type === "success" && toast.message.includes("cancelado")
-                  ? "#fef3c7"
-                  : toast.type === "success"
-                  ? "#d1fae5"
-                  : "#fee2e2",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              transition: "all 0.3s",
-              animation: "fadeIn 0.5s",
-            }}
-          >
-            {toast.type === "success" && toast.message.includes("cancelado")
-              ? "🚫"
-              : toast.type === "success"
-              ? "✅"
-              : "❌"}
-            {toast.message}
           </div>
         )}
       </main>

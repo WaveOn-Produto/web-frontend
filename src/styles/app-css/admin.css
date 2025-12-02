@@ -303,20 +303,30 @@
 
 /* Modal Large */
 .modal-large {
-  max-width: 600px;
+  max-width: 900px;
 }
 
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  margin-bottom: 0;
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+  transition: all 0.2s ease;
+}
+
+.detail-item:hover {
+  background: #f1f5f9;
+  transform: translateX(2px);
 }
 
 .detail-item.full-width {
@@ -325,13 +335,17 @@
 
 .detail-label {
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .detail-value {
-  font-size: 0.9375rem;
+  font-size: 1rem;
+  font-weight: 500;
   color: #1e293b;
+  line-height: 1.5;
 }
 
 /* Form elements */
@@ -594,12 +608,23 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 2rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-content {
@@ -613,6 +638,7 @@
   overflow-y: auto;
   position: relative;
   animation: modalSlideIn 0.3s ease-out;
+  padding: 2rem;
 }
 
 .modal-large {
@@ -622,12 +648,21 @@
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .modal-header {
@@ -674,6 +709,15 @@
   padding: 2rem;
 }
 
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
 .modal-footer {
   padding: 1.5rem 2rem;
   border-top: 1px solid #e2e8f0;
@@ -690,15 +734,19 @@
   background: #e2e8f0;
   color: #475569;
   border: none;
-  padding: 0.625rem 1.25rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.9375rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 100px;
 }
 
 .btn-secondary:hover {
   background: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive adjustments */

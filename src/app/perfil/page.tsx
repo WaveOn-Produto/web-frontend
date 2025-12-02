@@ -6,7 +6,6 @@ import { FaUser, FaEdit } from "react-icons/fa";
 import NavBar from "@/components/NavBar";
 import CarModal from "@/components/CarModal";
 import AddressModal from "@/components/AddressModal";
-import Toast from "@/components/Toast";
 import { useAuthContext } from "@/contexts/AuthContext";
 import apiClient from "@/services/api";
 import "@/styles/app-css/perfil.css";
@@ -47,11 +46,6 @@ export default function PerfilPage() {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [showCarsDropdown, setShowCarsDropdown] = useState(false);
   const [showAddressesDropdown, setShowAddressesDropdown] = useState(false);
-
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error" | "warning";
-  } | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -123,33 +117,33 @@ export default function PerfilPage() {
 
   const handleSaveName = () => {
     if (!fullName.trim()) {
-      setToast({ message: "Nome não pode estar vazio", type: "error" });
+      alert("Nome não pode estar vazio");
       return;
     }
-    setToast({ message: "Nome atualizado com sucesso!", type: "success" });
+    alert("Nome atualizado com sucesso!");
     setIsEditingName(false);
   };
 
   const handleSaveEmail = () => {
     if (!email.trim() || !email.includes("@")) {
-      setToast({ message: "Email inválido", type: "error" });
+      alert("Email inválido");
       return;
     }
-    setToast({ message: "Email atualizado com sucesso!", type: "success" });
+    alert("Email atualizado com sucesso!");
     setIsEditingEmail(false);
   };
 
   const handleSavePhone = () => {
     if (!phone.trim()) {
-      setToast({ message: "Telefone não pode estar vazio", type: "error" });
+      alert("Telefone não pode estar vazio");
       return;
     }
-    setToast({ message: "Telefone atualizado com sucesso!", type: "success" });
+    alert("Telefone atualizado com sucesso!");
     setIsEditingPhone(false);
   };
 
   const handleChangePassword = () => {
-    setToast({ message: "Funcionalidade em desenvolvimento", type: "warning" });
+    alert("Funcionalidade em desenvolvimento");
   };
 
   const handleAddCar = async (carData: {
@@ -170,14 +164,11 @@ export default function PerfilPage() {
 
       setCars([...cars, newCar]);
       setShowCarModal(false);
-      setToast({ message: "Veículo adicionado com sucesso!", type: "success" });
+      alert("Veículo adicionado com sucesso!");
     } catch (error: unknown) {
       console.error("Erro ao adicionar veículo:", error);
       const err = error as { response?: { data?: { message?: string } } };
-      setToast({
-        message: err.response?.data?.message || "Erro ao adicionar veículo",
-        type: "error",
-      });
+      alert(err.response?.data?.message || "Erro ao adicionar veículo");
     }
   };
 
@@ -211,17 +202,11 @@ export default function PerfilPage() {
 
       setAddresses([...addresses, newAddress]);
       setShowAddressModal(false);
-      setToast({
-        message: "Endereço adicionado com sucesso!",
-        type: "success",
-      });
+      alert("Endereço adicionado com sucesso!");
     } catch (error: unknown) {
       console.error("Erro ao adicionar endereço:", error);
       const err = error as { response?: { data?: { message?: string } } };
-      setToast({
-        message: err.response?.data?.message || "Erro ao adicionar endereço",
-        type: "error",
-      });
+      alert(err.response?.data?.message || "Erro ao adicionar endereço");
     }
   };
 
@@ -420,14 +405,6 @@ export default function PerfilPage() {
         onClose={() => setShowAddressModal(false)}
         onSave={handleAddAddress}
       />
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
     </div>
   );
 }

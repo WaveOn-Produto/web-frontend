@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import apiClient from "@/services/api";
-import Toast from "@/components/Toast";
 
 export default function PixPaymentPage() {
   const router = useRouter();
@@ -14,10 +13,6 @@ export default function PixPaymentPage() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
   const [status, setStatus] = useState("PENDING");
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error" | "info" | "warning";
-  } | null>(null);
 
   // Buscar pagamento PIX
   useEffect(() => {
@@ -29,7 +24,7 @@ export default function PixPaymentPage() {
         setStatus(resp.data.status);
       } catch (err) {
         console.error(err);
-        setToast({ message: "Erro ao carregar QR Code", type: "error" });
+        alert("Erro ao carregar QR Code");
       }
     };
 
@@ -44,19 +39,15 @@ export default function PixPaymentPage() {
   // Se aprovado → voltar para home
   useEffect(() => {
     if (status === "APPROVED") {
-      setToast({
-        message: "Pagamento aprovado! Redirecionando...",
-        type: "success",
-      });
-
-      setTimeout(() => router.push("/"), 2000);
+      alert("Pagamento aprovado! Redirecionando...");
+      router.push("/");
     }
   }, [status, router]);
 
   const copyCode = () => {
     if (qrCode) {
       navigator.clipboard.writeText(qrCode);
-      setToast({ message: "Código copiado!", type: "success" });
+      alert("Código copiado!");
     }
   };
 

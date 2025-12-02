@@ -5,7 +5,6 @@ import { Car } from "@/types/car";
 import { useRouter, useSearchParams } from "next/navigation";
 import NavBar from "@/components/NavBar";
 import LoginModal from "@/components/LoginModal";
-import Toast from "@/components/Toast";
 import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/services/api";
 import "@/styles/app-css/agendamento.css";
@@ -79,10 +78,6 @@ function AgendamentoContent() {
   const [currentPrice, setCurrentPrice] = useState(preco);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const redirectPathRef = useRef<string | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error" | "warning";
-  } | null>(null);
 
   const generateMonthCalendar = () => {
     const today = new Date();
@@ -317,10 +312,7 @@ function AgendamentoContent() {
       return;
     }
     if (!selectedDate || !selectedTime || !selectedCategory) {
-      setToast({
-        message: "Por favor, preencha todos os campos",
-        type: "warning",
-      });
+      alert("Por favor, preencha todos os campos");
       return;
     }
 
@@ -589,14 +581,6 @@ function AgendamentoContent() {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
       />
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
     </div>
   );
 }

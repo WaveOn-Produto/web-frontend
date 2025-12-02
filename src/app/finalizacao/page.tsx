@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/services/api";
-import Toast from "@/components/Toast";
 import AlertInfo from "@/components/AlertInfo";
 import "@/styles/app-css/finalizacao.css";
 import CardFormInline, { CardFormData } from "@/components/CardFormInline";
@@ -48,10 +47,6 @@ const FinalizacaoContent: React.FC = () => {
       city?: string;
     }>
   >([]);
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error" | "warning";
-  } | null>(null);
   const [torneira, setTorneira] = useState(false);
   const [tomada, setTomada] = useState(false);
   const [showCardForm, setShowCardForm] = useState(false);
@@ -77,10 +72,7 @@ const FinalizacaoContent: React.FC = () => {
           const err = error as { response?: { status?: number } };
           // Só mostra erro se não for 401
           if (err.response?.status !== 401) {
-            setToast({
-              message: "Erro ao carregar dados. Tente novamente.",
-              type: "error",
-            });
+            alert("Erro ao carregar dados. Tente novamente.");
           }
         }
       }
@@ -91,10 +83,7 @@ const FinalizacaoContent: React.FC = () => {
 
   const handleContinueInfo = () => {
     if (!selectedAddress || !selectedVehicle) {
-      setToast({
-        message: "Por favor, selecione endereço e veículo",
-        type: "warning",
-      });
+      alert("Por favor, selecione endereço e veículo");
       return;
     }
     setShowPaymentCards(true);
@@ -102,18 +91,12 @@ const FinalizacaoContent: React.FC = () => {
 
   const handleFinalizar = async () => {
     if (!selectedPayment) {
-      setToast({
-        message: "Por favor, selecione um método de pagamento",
-        type: "warning",
-      });
+      alert("Por favor, selecione um método de pagamento");
       return;
     }
 
     if (!torneira || !tomada) {
-      setToast({
-        message: "Por favor, confirme os itens necessários",
-        type: "warning",
-      });
+      alert("Por favor, confirme os itens necessários");
       return;
     }
 
@@ -159,10 +142,7 @@ const FinalizacaoContent: React.FC = () => {
 
       // *** VALIDAR FORMULÁRIO DE CARTÃO ***
       if (selectedPayment === "cartao" && !cardToken) {
-        setToast({
-          message: "Preencha os dados do cartão antes de finalizar!",
-          type: "warning",
-        });
+        alert("Preencha os dados do cartão antes de finalizar!");
         return;
       }
 
@@ -178,13 +158,8 @@ const FinalizacaoContent: React.FC = () => {
         });
 
         // REDIRECIONAR PARA HOME
-        setToast({
-          message: "Agendamento realizado com sucesso!",
-          type: "success",
-        });
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
+        alert("Agendamento realizado com sucesso!");
+        router.push("/");
         return;
       }
     } catch (error: unknown) {
@@ -195,7 +170,7 @@ const FinalizacaoContent: React.FC = () => {
       const errorMessage =
         err.response?.data?.message ||
         "Erro ao finalizar agendamento. Tente novamente.";
-      setToast({ message: errorMessage, type: "error" });
+      alert(errorMessage);
     }
   };
 
@@ -421,7 +396,7 @@ const FinalizacaoContent: React.FC = () => {
                 onSubmit={(data: CardFormData) => {
                   setCardToken(data.token);
                   setShowCardForm(false);
-                  setToast({ message: "Cartão validado!", type: "success" });
+                  alert("Cartão validado!");
                 }}
                 onCancel={() => setShowCardForm(false)}
               />
@@ -475,14 +450,6 @@ const FinalizacaoContent: React.FC = () => {
           </div>
         )}
       </div>
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
     </div>
   );
 };

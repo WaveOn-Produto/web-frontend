@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/services/api";
-import Toast from "@/components/Toast";
 import "@/styles/app-css/agendamentos.css";
 
 interface Agendamento {
@@ -43,23 +42,12 @@ const AgendamentosPage: React.FC = () => {
   const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(
     null
   );
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
 
   useEffect(() => {
     if (!loading && user) {
       fetchAgendamentos();
     }
   }, [loading, user]);
-
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
 
   const fetchAgendamentos = async () => {
     try {
@@ -82,14 +70,11 @@ const AgendamentosPage: React.FC = () => {
 
     try {
       await apiClient.patch(`/appointments/${appointmentToCancel}/cancel`);
-      setToast({
-        message: "Agendamento cancelado com sucesso!",
-        type: "success",
-      });
+      alert("Agendamento cancelado com sucesso!");
       fetchAgendamentos();
     } catch (error) {
       console.error("Erro ao cancelar agendamento:", error);
-      setToast({ message: "Erro ao cancelar agendamento", type: "error" });
+      alert("Erro ao cancelar agendamento");
     } finally {
       setShowCancelModal(false);
       setAppointmentToCancel(null);
@@ -105,7 +90,7 @@ const AgendamentosPage: React.FC = () => {
       window.location.href = `/agendamento?servico=${serviceType}&categoria=${vehicleCategory}`;
     } catch (error) {
       console.error("Erro ao repetir agendamento:", error);
-      setToast({ message: "Erro ao repetir agendamento", type: "error" });
+      alert("Erro ao repetir agendamento");
     }
   };
 
@@ -458,15 +443,6 @@ const AgendamentosPage: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Toast de Feedback */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
       )}
     </div>
   );
