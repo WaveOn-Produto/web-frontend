@@ -168,20 +168,6 @@ export default function AdminAgendamentos() {
     }
   };
 
-  const handleMarkAppointment = async (selectedTimeSlot: string) => {
-    try {
-      await apiClient.post("/appointments", { timeSlot: selectedTimeSlot });
-      setAvailableTimeSlots((prev) =>
-        prev.filter((timeSlot) => timeSlot !== selectedTimeSlot)
-      );
-      alert("✅ Horário marcado com sucesso!");
-      fetchAppointments();
-    } catch (error) {
-      console.error("Erro ao marcar horário:", error);
-      alert("❌ Erro ao marcar horário. Tente novamente.");
-    }
-  };
-
   const filteredAppointments = appointments.filter((apt) => {
     if (filterStatus !== "all" && apt.status !== filterStatus) return false;
 

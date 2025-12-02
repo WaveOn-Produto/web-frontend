@@ -11,12 +11,7 @@ import "@/styles/app-css/login.css";
 import "@/styles/app-css/cadastro.css";
 import apiClient from "@/services/api";
 import { User } from "@/types/auth";
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaPhone,
-} from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaPhone } from "react-icons/fa";
 
 const RegisterContent: React.FC = () => {
   const searchParams = useSearchParams();
