@@ -124,13 +124,18 @@ const FinalizacaoContent: React.FC = () => {
       // ================================
       // 1️⃣ Criar o agendamento
       // ================================
+
+      // Buscar a categoria do carro selecionado
+      const selectedCar = userCars.find((car) => car.id === selectedVehicle);
+      const vehicleCategory = selectedCar?.category || categoria;
+
       const appointmentData = {
         serviceType: servico,
         date: data,
         time: horario,
         carId: selectedVehicle,
         addressId: selectedAddress,
-        vehicleCategory: categoria,
+        vehicleCategory: vehicleCategory,
       };
 
       console.log("📝 Dados do agendamento:", appointmentData);
