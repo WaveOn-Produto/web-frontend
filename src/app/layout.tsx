@@ -23,7 +23,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "WaveOn - Lavagem Automotiva",
+  title: "VBLavagens",
   description: "Plataforma de agendamento e gestão de serviços automotivos.",
   icons: {
     icon: "/Stockio_logo.png",
