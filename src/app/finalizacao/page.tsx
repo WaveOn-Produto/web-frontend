@@ -71,6 +71,8 @@ const FinalizacaoContent: React.FC = () => {
             apiClient.get("/cars/my"),
             apiClient.get("/addresses/my"),
           ]);
+          console.log("🚗 Carros carregados:", carsResponse.data);
+          console.log("🏠 Endereços carregados:", addressesResponse.data);
           setUserCars(carsResponse.data);
           setUserAddresses(addressesResponse.data);
         } catch (error: unknown) {
