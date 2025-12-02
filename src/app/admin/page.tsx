@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import "@/styles/app-css/admin.css";
 
 export default function AdminDashboard() {
-  const { user, token, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState([
     { title: "Agendamentos Hoje", value: "-", icon: "📅", color: "#3a94e7" },
     { title: "Pendentes", value: "-", icon: "⏰", color: "#f59e0b" },

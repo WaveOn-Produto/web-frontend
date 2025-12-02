@@ -84,7 +84,7 @@ const AgendamentosPage: React.FC = () => {
   const handleRepeat = async (id: string) => {
     try {
       const response = await apiClient.get(`/appointments/${id}/repeat`);
-      const { serviceType, vehicleCategory, carId, addressId } = response.data;
+      const { serviceType, vehicleCategory } = response.data;
 
       // Redireciona para página de agendamento com os dados pré-preenchidos
       window.location.href = `/agendamento?servico=${serviceType}&categoria=${vehicleCategory}`;

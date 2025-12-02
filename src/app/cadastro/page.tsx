@@ -16,8 +16,6 @@ import {
   FaEnvelope,
   FaLock,
   FaPhone,
-  FaMapMarkerAlt,
-  FaQuestionCircle,
 } from "react-icons/fa";
 
 const RegisterContent: React.FC = () => {
@@ -123,7 +121,7 @@ const RegisterContent: React.FC = () => {
         phone: form.cellphone || undefined,
       };
 
-      const response = await apiClient.post<User>("/users/register", payload);
+      await apiClient.post<User>("/users/register", payload);
 
       setSuccess("Conta criada com sucesso! Fazendo login...");
 

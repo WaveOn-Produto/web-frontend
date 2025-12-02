@@ -144,16 +144,6 @@ export default function PixPaymentPage() {
           Voltar
         </button>
       </div>
-
-      {toast && (
-        <div style={{ position: "fixed", top: 50, right: 30 }}>
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        </div>
-      )}
     </div>
   );
 }

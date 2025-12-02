@@ -150,7 +150,7 @@ const FinalizacaoContent: React.FC = () => {
       // 3️⃣ Pagamento CARTÃO (mock)
       // ================================
       if (selectedPayment === "cartao") {
-        const paymentResp = await apiClient.post("/payments/card", {
+        await apiClient.post("/payments/card", {
           appointmentId,
           userId: user?.id,
           token: cardToken,

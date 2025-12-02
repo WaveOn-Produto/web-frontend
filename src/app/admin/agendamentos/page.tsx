@@ -58,8 +58,6 @@ export default function AdminAgendamentos() {
   const [showModal, setShowModal] = useState(false);
   const [showObsModal, setShowObsModal] = useState(false);
   const [observacoes, setObservacoes] = useState("");
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Verificação de permissão de admin
   useEffect(() => {
@@ -74,25 +72,6 @@ export default function AdminAgendamentos() {
       fetchAppointments();
     }
   }, [user]);
-
-  useEffect(() => {
-    // Carregar horários disponíveis do backend
-    const fetchAvailableTimeSlots = async () => {
-      try {
-        const response = await apiClient.get(
-          `/appointments/available-slots?date=${selectedDate}`
-        );
-        setAvailableTimeSlots(response.data.availableSlots);
-      } catch (error) {
-        console.error("Erro ao carregar horários disponíveis:", error);
-        alert("Erro ao carregar horários disponíveis");
-      }
-    };
-
-    if (selectedDate) {
-      fetchAvailableTimeSlots();
-    }
-  }, [selectedDate]);
 
   const fetchAppointments = async () => {
     try {

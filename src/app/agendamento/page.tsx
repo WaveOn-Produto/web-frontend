@@ -11,7 +11,7 @@ import "@/styles/app-css/agendamento.css";
 import "@/styles/components-css/login-modal.css";
 
 function AgendamentoContent() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -66,7 +66,7 @@ function AgendamentoContent() {
             )
           : [];
         setUserCars(cars);
-      } catch (error) {
+      } catch {
         setUserCars([]);
       }
     };
@@ -271,7 +271,7 @@ function AgendamentoContent() {
 
       const response = await apiClient.get(url);
       return response.data.price;
-    } catch (error) {
+    } catch {
       return preco;
     }
   };
